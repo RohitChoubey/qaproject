@@ -914,7 +914,6 @@ table.dataTable {
 }
 
 
-
 .sidebar {
   height: 100vh;
   left: 0;
@@ -925,10 +924,12 @@ table.dataTable {
   z-index: 999;
   overflow: hidden;
   overflow-y: auto;
-  transition: 0.5s;
+  transition: transform 0.3s ease;
   background: #fff;
+  color: #fff;
   box-shadow: 0 12px 30px rgb(80, 143, 244, 0.1);
 }
+
 
 @media only screen and (min-width: 992px) and (max-width: 1200px) {
   .sidebar.hide_vertical_menu {
@@ -2188,4 +2189,16 @@ a {
 
 ol, ul {
   padding-left: 1rem !important;
+}
+
+/* =================================================================================== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  color: #fff;
+  transition: transform 0.3s ease;
+  
 }

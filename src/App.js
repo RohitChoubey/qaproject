@@ -25,7 +25,6 @@ const Loader = () => (
 );
 
 const MainLayout = ({ isSidebarOpen, toggleSidebar, logout }) => {
-  
   return (
     <>
       <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} logout={logout} />
@@ -39,12 +38,13 @@ const MainLayout = ({ isSidebarOpen, toggleSidebar, logout }) => {
           <Route path="/performancereport" element={<Performancereport />} />
           <Route path="/detailedreport/:loginId" element={<Detailedreport />} />
           <Route path="/adminsetting" element={<Adminsetting />} />
-          <Route path="*" element={<div>404 - Page Not Found</div>} /> Add a 404 page
+          <Route path="*" element={<div>404 - Page Not Found</div>} /> {/* Add a 404 page */}
         </Routes>
       </section>
     </>
   );
 };
+
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -62,7 +62,6 @@ function App() {
     localStorage.removeItem("username");
     localStorage.removeItem("role");
     setIsAuthenticated(false);
-    
   };
 
   useEffect(() => {
@@ -71,7 +70,7 @@ function App() {
       setIsAuthenticated(true);
     }
   }, []);
-  
+
   return (
     <Router>
       <Suspense fallback={<Loader />}>

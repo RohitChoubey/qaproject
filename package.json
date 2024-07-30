@@ -2,7 +2,7 @@
   "name": "qaproject",
   "version": "0.1.0",
   "private": true,
-    "homepage": "https://https://rohitchoubey.github.io/<repository-name>",
+  "homepage": "https://https://rohitchoubey.github.io/qaproject",
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
@@ -19,6 +19,7 @@
     "bootstrap": "^5.3.3",
     "core-js": "^3.37.1",
     "crypto-js": "^4.2.0",
+    "jquery": "^3.7.1",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
     "react": "^18.3.1",
@@ -40,7 +41,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -61,6 +64,7 @@
     ]
   },
   "devDependencies": {
-    "css-minimizer-webpack-plugin": "^7.0.0"
+    "css-minimizer-webpack-plugin": "^7.0.0",
+    "gh-pages": "^6.1.1"
   }
 }
