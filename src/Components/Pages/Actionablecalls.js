@@ -187,7 +187,7 @@ export default function Actionablecalls() {
             <div className="row justify-content-center">
               <div className="col-lg-6">
                 <div className="white_card mb-20">
-                  <table className="table table-striped table-bordered call-logs-table ml-4">
+                  <table className="table table-responsive table-striped table-bordered call-logs-table ml-4">
                     <thead>
                       <tr>
                         <th scope="col">Sr. No</th>
@@ -253,201 +253,320 @@ export default function Actionablecalls() {
                       onPause={() => setIsPlaying(false)}
                     />
                   </div>
-                      <hr/>
-                 <div className="wrapper ml-3 white_card mb-20">
-            <div className="card-body">
-              <h3>Questionnaire</h3>
-              <div className="form-group-row">
-                <label className="col-12" htmlFor="signalInformation">
-                  Signal Information
-                </label>
-                <textarea
-                  className="form-control"
-                  id="signalInformation"
-                  rows="3"
-                  value={eventId}
-                  readOnly
-                ></textarea>
-              </div>
-              <div className="container">
-  <div className="row mb-3">
-    <div className="col-6">
-      <label className="form-label" htmlFor="complianceSOP">
-        1) Compliance of SOP
-      </label>
-    </div>
-    <div className="col-6">
-      <div>
-        <button
-          className={`btn me-2 ${answers.complianceSOP === "Poor" ? "btn-danger" : ""}`}
-          onClick={() => handleButtonClick("complianceSOP", "Poor")}
-        >
-          Poor
-        </button>
-        <button
-          className={`btn me-2 ${answers.complianceSOP === "Good" ? "btn-warning" : ""}`}
-          onClick={() => handleButtonClick("complianceSOP", "Good")}
-        >
-          Good
-        </button>
-        <button
-          className={`btn me-2 ${answers.complianceSOP === "Excellent" ? "btn-primary" : ""}`}
-          onClick={() => handleButtonClick("complianceSOP", "Excellent")}
-        >
-          Excellent
-        </button>
-      </div>
-    </div>
-  </div>
+                  <hr />
+                  <div className="wrapper ml-3 white_card mb-20">
+                    <div className="card-body">
+                      <h3>Questionnaire</h3>
+                      <div className="form-group-row">
+                        <label className="col-12" htmlFor="signalInformation">
+                          Signal Information
+                        </label>
+                        <textarea
+                          className="form-control"
+                          id="signalInformation"
+                          rows="3"
+                          value={eventId}
+                          readOnly
+                        ></textarea>
+                      </div>
+                      <div className="container">
+                        <div className="row mb-3">
+                          <div className="col-6">
+                            <label
+                              className="form-label"
+                              htmlFor="complianceSOP"
+                            >
+                              1) Compliance of SOP
+                            </label>
+                          </div>
+                          <div className="col-6">
+                            <div>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.complianceSOP === "Poor"
+                                    ? "btn-danger"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("complianceSOP", "Poor")
+                                }
+                              >
+                                Poor
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.complianceSOP === "Good"
+                                    ? "btn-warning"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("complianceSOP", "Good")
+                                }
+                              >
+                                Good
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.complianceSOP === "Excellent"
+                                    ? "btn-primary"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick(
+                                    "complianceSOP",
+                                    "Excellent"
+                                  )
+                                }
+                              >
+                                Excellent
+                              </button>
+                            </div>
+                          </div>
+                        </div>
 
-  <div className="row mb-3">
-    <div className="col-6">
-      <label className="form-label" htmlFor="activeListening">
-        2) Active Listening & Proper response
-      </label>
-    </div>
-    <div className="col-6">
-      <div>
-        <button
-          className={`btn me-2 ${answers.activeListening === "Poor" ? "btn-danger" : ""}`}
-          onClick={() => handleButtonClick("activeListening", "Poor")}
-        >
-          Poor
-        </button>
-        <button
-          className={`btn me-2 ${answers.activeListening === "Good" ? "btn-warning" : ""}`}
-          onClick={() => handleButtonClick("activeListening", "Good")}
-        >
-          Good
-        </button>
-        <button
-          className={`btn me-2 ${answers.activeListening === "Excellent" ? "btn-primary" : ""}`}
-          onClick={() => handleButtonClick("activeListening", "Excellent")}
-        >
-          Excellent
-        </button>
-      </div>
-    </div>
-  </div>
+                        <div className="row mb-3">
+                          <div className="col-6">
+                            <label
+                              className="form-label"
+                              htmlFor="activeListening"
+                            >
+                              2) Active Listening & Proper response
+                            </label>
+                          </div>
+                          <div className="col-6">
+                            <div>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.activeListening === "Poor"
+                                    ? "btn-danger"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("activeListening", "Poor")
+                                }
+                              >
+                                Poor
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.activeListening === "Good"
+                                    ? "btn-warning"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("activeListening", "Good")
+                                }
+                              >
+                                Good
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.activeListening === "Excellent"
+                                    ? "btn-primary"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick(
+                                    "activeListening",
+                                    "Excellent"
+                                  )
+                                }
+                              >
+                                Excellent
+                              </button>
+                            </div>
+                          </div>
+                        </div>
 
-  <div className="row mb-3">
-    <div className="col-6">
-      <label className="form-label" htmlFor="correctDetails">
-        3) Correct And Relevant Details Capturing
-      </label>
-    </div>
-    <div className="col-6">
-      <div>
-        <button
-          className={`btn me-2 ${answers.correctDetails === "Poor" ? "btn-danger" : ""}`}
-          onClick={() => handleButtonClick("correctDetails", "Poor")}
-        >
-          Poor
-        </button>
-        <button
-          className={`btn me-2 ${answers.correctDetails === "Good" ? "btn-warning" : ""}`}
-          onClick={() => handleButtonClick("correctDetails", "Good")}
-        >
-          Good
-        </button>
-        <button
-          className={`btn me-2 ${answers.correctDetails === "Excellent" ? "btn-primary" : ""}`}
-          onClick={() => handleButtonClick("correctDetails", "Excellent")}
-        >
-          Excellent
-        </button>
-      </div>
-    </div>
-  </div>
+                        <div className="row mb-3">
+                          <div className="col-6">
+                            <label
+                              className="form-label"
+                              htmlFor="correctDetails"
+                            >
+                              3) Correct And Relevant Details Capturing
+                            </label>
+                          </div>
+                          <div className="col-6">
+                            <div>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.correctDetails === "Poor"
+                                    ? "btn-danger"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("correctDetails", "Poor")
+                                }
+                              >
+                                Poor
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.correctDetails === "Good"
+                                    ? "btn-warning"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("correctDetails", "Good")
+                                }
+                              >
+                                Good
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.correctDetails === "Excellent"
+                                    ? "btn-primary"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick(
+                                    "correctDetails",
+                                    "Excellent"
+                                  )
+                                }
+                              >
+                                Excellent
+                              </button>
+                            </div>
+                          </div>
+                        </div>
 
-  <div className="row mb-3">
-    <div className="col-6">
-      <label className="form-label" htmlFor="addressTagging">
-        4) Correct Address Tagging
-      </label>
-    </div>
-    <div className="col-6">
-      <div>
-        <button
-          className={`btn me-2 ${answers.addressTagging === "Poor" ? "btn-danger" : ""}`}
-          onClick={() => handleButtonClick("addressTagging", "Poor")}
-        >
-          Poor
-        </button>
-        <button
-          className={`btn me-2 ${answers.addressTagging === "Good" ? "btn-warning" : ""}`}
-          onClick={() => handleButtonClick("addressTagging", "Good")}
-        >
-          Good
-        </button>
-        <button
-          className={`btn me-2 ${answers.addressTagging === "Excellent" ? "btn-primary" : ""}`}
-          onClick={() => handleButtonClick("addressTagging", "Excellent")}
-        >
-          Excellent
-        </button>
-      </div>
-    </div>
-  </div>
+                        <div className="row mb-3">
+                          <div className="col-6">
+                            <label
+                              className="form-label"
+                              htmlFor="addressTagging"
+                            >
+                              4) Correct Address Tagging
+                            </label>
+                          </div>
+                          <div className="col-6">
+                            <div>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.addressTagging === "Poor"
+                                    ? "btn-danger"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("addressTagging", "Poor")
+                                }
+                              >
+                                Poor
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.addressTagging === "Good"
+                                    ? "btn-warning"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("addressTagging", "Good")
+                                }
+                              >
+                                Good
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.addressTagging === "Excellent"
+                                    ? "btn-primary"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick(
+                                    "addressTagging",
+                                    "Excellent"
+                                  )
+                                }
+                              >
+                                Excellent
+                              </button>
+                            </div>
+                          </div>
+                        </div>
 
-  <div className="row mb-3">
-    <div className="col-6">
-      <label className="form-label" htmlFor="callHandlingTime">
-        5) Call Handled Time
-      </label>
-    </div>
-    <div className="col-6">
-      <div>
-        <button
-          className={`btn me-2 ${answers.callHandlingTime === "Poor" ? "btn-danger" : ""}`}
-          onClick={() => handleButtonClick("callHandlingTime", "Poor")}
-        >
-          Poor
-        </button>
-        <button
-          className={`btn me-2 ${answers.callHandlingTime === "Good" ? "btn-warning" : ""}`}
-          onClick={() => handleButtonClick("callHandlingTime", "Good")}
-        >
-          Good
-        </button>
-        <button
-          className={`btn me-2 ${answers.callHandlingTime === "Excellent" ? "btn-primary" : ""}`}
-          onClick={() => handleButtonClick("callHandlingTime", "Excellent")}
-        >
-          Excellent
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+                        <div className="row mb-3">
+                          <div className="col-6">
+                            <label
+                              className="form-label"
+                              htmlFor="callHandlingTime"
+                            >
+                              5) Call Handled Time
+                            </label>
+                          </div>
+                          <div className="col-6">
+                            <div>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.callHandlingTime === "Poor"
+                                    ? "btn-danger"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("callHandlingTime", "Poor")
+                                }
+                              >
+                                Poor
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.callHandlingTime === "Good"
+                                    ? "btn-warning"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick("callHandlingTime", "Good")
+                                }
+                              >
+                                Good
+                              </button>
+                              <button
+                                className={`btn me-2 ${
+                                  answers.callHandlingTime === "Excellent"
+                                    ? "btn-primary"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleButtonClick(
+                                    "callHandlingTime",
+                                    "Excellent"
+                                  )
+                                }
+                              >
+                                Excellent
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
+                      <div className="form-group-row">
+                        <label className="col-6" htmlFor="remark">
+                          Remark (Optional)
+                        </label>
+                        <textarea
+                          className="form-control"
+                          id="remark"
+                          rows="3"
+                          value={answers.remark}
+                          onChange={(e) =>
+                            setAnswers((prevAnswers) => ({
+                              ...prevAnswers,
+                              remark: e.target.value,
+                            }))
+                          }
+                        ></textarea>
+                      </div>
 
-              <div className="form-group-row">
-                <label className="col-6" htmlFor="remark">
-                  Remark (Optional)
-                </label>
-                <textarea
-                  className="form-control"
-                  id="remark"
-                  rows="3"
-                  value={answers.remark}
-                  onChange={(e) =>
-                    setAnswers((prevAnswers) => ({
-                      ...prevAnswers,
-                      remark: e.target.value,
-                    }))
-                  }
-                ></textarea>
-              </div>
-
-              <button
-                className="btn btn-primary mt-3 mb-2"
-                onClick={handleSubmit}
-              >
-                Submit
-              </button>
-            </div>
-          </div>
+                      <button
+                        className="btn btn-primary mt-3 mb-2"
+                        onClick={handleSubmit}
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

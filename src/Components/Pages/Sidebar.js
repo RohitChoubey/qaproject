@@ -14,7 +14,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
     <nav className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
       <div className="logo d-flex justify-content-between mt-5">
         <NavLink to="/" exact><img src={policeImage} alt="logo" className="h-auto" /></NavLink>
-        <div className="sidebar_close_icon d-lg-none" size="2x" onClick={toggleSidebar}>
+        <div className="sidebar_close_icon d-lg-none" onClick={toggleSidebar}>
           <FontAwesomeIcon icon={faTimes} />
         </div>
       </div>

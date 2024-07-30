@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPhoneAlt,
   faExclamationCircle,
+  faTimesCircle,
   faWaveSquare,
   faPhoneSlash,
   faRoad,
@@ -14,13 +15,12 @@ import { Link, NavLink } from "react-router-dom";
 const callData = [
   { type: "Actionable Calls", total: 4500, qa: 225, pending: 220, icon: faPhoneAlt, color: "#007bff", path: "/actionablecalls" },
   { type: "Abusive Calls", total: 4500, qa: 225, pending: 220, icon: faExclamationCircle, color: "#dc3545", path: "/abusivecalls" },
-  { type: "Missed Calls", total: 4500, qa: 225, pending: 220, icon: faPhoneSlash  , color: "#dc3545", path: "/missedcalls" }, // Updated icon here
+  { type: "Missed Calls", total: 4500, qa: 225, pending: 220, icon: faTimesCircle, color: "#6c757d", path: "/missedcalls" },
   { type: "Non Voice Signal", total: 4500, qa: 225, pending: 220, icon: faWaveSquare, color: "#17a2b8", path: "/nonvoicesignal" },
   { type: "No Response Calls", total: 4500, qa: 225, pending: 220, icon: faPhoneSlash, color: "#ffc107", path: "/noresponsecalls" },
   { type: "Trip Monitoring Calls", total: 4500, qa: 225, pending: 220, icon: faRoad, color: "#28a745", path: "/tripmonitoringcalls" },
   { type: "Feedback Calls", total: 4500, qa: 225, pending: 220, icon: faComments, color: "#6610f2", path: "/feedbackcalls" },
 ];
-
 
 const Dashboard = () => {
   
@@ -96,4 +96,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-   
