@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "//rohitchoubey.github.io/qaproject/static/css/main.47a6e374.css",
-    "main.js": "//rohitchoubey.github.io/qaproject/static/js/main.c314cb11.js",
+    "main.css": "//rohitchoubey.github.io/qaproject/static/css/main.26147a97.css",
+    "main.js": "//rohitchoubey.github.io/qaproject/static/js/main.38f1a5f0.js",
     "static/css/381.9b185332.chunk.css": "//rohitchoubey.github.io/qaproject/static/css/381.9b185332.chunk.css",
-    "static/js/381.90f245ac.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/381.90f245ac.chunk.js",
+    "static/js/381.8a7af3e7.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/381.8a7af3e7.chunk.js",
     "static/js/987.f1b0ad29.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/987.f1b0ad29.chunk.js",
     "static/js/874.9e9ee9c3.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/874.9e9ee9c3.chunk.js",
     "static/js/389.59794c56.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/389.59794c56.chunk.js",
-    "static/js/146.6951a51f.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/146.6951a51f.chunk.js",
-    "static/css/36.797693d2.chunk.css": "//rohitchoubey.github.io/qaproject/static/css/36.797693d2.chunk.css",
+    "static/js/146.909e9be5.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/146.909e9be5.chunk.js",
+    "static/css/36.b6d66a97.chunk.css": "//rohitchoubey.github.io/qaproject/static/css/36.b6d66a97.chunk.css",
     "static/js/36.9dfde83f.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/36.9dfde83f.chunk.js",
     "static/js/562.d49d62db.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/562.d49d62db.chunk.js",
     "static/js/453.01689773.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/453.01689773.chunk.js",
@@ -19,18 +19,19 @@
     "static/js/210.5b7f849f.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/210.5b7f849f.chunk.js",
     "static/css/850.3bc8086a.chunk.css": "//rohitchoubey.github.io/qaproject/static/css/850.3bc8086a.chunk.css",
     "static/js/401.8ffc0b58.chunk.js": "//rohitchoubey.github.io/qaproject/static/js/401.8ffc0b58.chunk.js",
+    "static/media/112_hr_logo.png": "//rohitchoubey.github.io/qaproject/static/media/112_hr_logo.7053f20d2613d755339c.png",
     "static/media/hr_police2.png": "//rohitchoubey.github.io/qaproject/static/media/hr_police2.1c2f6658d04bc899cace.png",
     "static/media/QA_hr_logo.png": "//rohitchoubey.github.io/qaproject/static/media/QA_hr_logo.0cbd7d044374362da8b1.png",
     "index.html": "//rohitchoubey.github.io/qaproject/index.html",
-    "main.47a6e374.css.map": "//rohitchoubey.github.io/qaproject/static/css/main.47a6e374.css.map",
-    "main.c314cb11.js.map": "//rohitchoubey.github.io/qaproject/static/js/main.c314cb11.js.map",
+    "main.26147a97.css.map": "//rohitchoubey.github.io/qaproject/static/css/main.26147a97.css.map",
+    "main.38f1a5f0.js.map": "//rohitchoubey.github.io/qaproject/static/js/main.38f1a5f0.js.map",
     "381.9b185332.chunk.css.map": "//rohitchoubey.github.io/qaproject/static/css/381.9b185332.chunk.css.map",
-    "381.90f245ac.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/381.90f245ac.chunk.js.map",
+    "381.8a7af3e7.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/381.8a7af3e7.chunk.js.map",
     "987.f1b0ad29.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/987.f1b0ad29.chunk.js.map",
     "874.9e9ee9c3.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/874.9e9ee9c3.chunk.js.map",
     "389.59794c56.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/389.59794c56.chunk.js.map",
-    "146.6951a51f.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/146.6951a51f.chunk.js.map",
-    "36.797693d2.chunk.css.map": "//rohitchoubey.github.io/qaproject/static/css/36.797693d2.chunk.css.map",
+    "146.909e9be5.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/146.909e9be5.chunk.js.map",
+    "36.b6d66a97.chunk.css.map": "//rohitchoubey.github.io/qaproject/static/css/36.b6d66a97.chunk.css.map",
     "36.9dfde83f.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/36.9dfde83f.chunk.js.map",
     "562.d49d62db.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/562.d49d62db.chunk.js.map",
     "453.01689773.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/453.01689773.chunk.js.map",
@@ -43,7 +44,7 @@
     "401.8ffc0b58.chunk.js.map": "//rohitchoubey.github.io/qaproject/static/js/401.8ffc0b58.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.47a6e374.css",
-    "static/js/main.c314cb11.js"
+    "static/css/main.26147a97.css",
+    "static/js/main.38f1a5f0.js"
   ]
 }
