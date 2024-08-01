@@ -265,3 +265,24 @@ h2 {
 .placeholder-container {
   position: relative;
 }
+
+/* Base style for canvas */
+.canvas {
+  height: 50px; /* Set a fixed height */
+  background-color: #f2f2f2; /* Background color if needed */
+  border: 1px solid #ddd; /* Optional border */
+}
+
+/* Styles for large screens */
+@media (min-width: 992px) {
+  .canvas {
+    width: 290px;
+  }
+}
+
+/* Styles for mobile screens */
+@media (max-width: 991px) {
+  .canvas {
+    width: 200px;
+  }
+}

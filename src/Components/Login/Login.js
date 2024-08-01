@@ -61,7 +61,7 @@ const CaptchaImage = ({ captcha }) => {
     ctx.fillText(captcha, canvas.width / 2, canvas.height / 2);
   }, [captcha]);
 
-  return <canvas ref={canvasRef} width="390" height="50"></canvas>;
+  return <canvas ref={canvasRef} width="200" height="50"></canvas>;
 };
 
 const Login = ({ onLogin }) => {
