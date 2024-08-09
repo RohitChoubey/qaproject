@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "proxy" : "https://api_url/",  
+  "homepage": "https://rohitchoubey.github.io/qaproject",
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
