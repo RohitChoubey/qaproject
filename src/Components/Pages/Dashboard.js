@@ -76,7 +76,7 @@ const Dashboard = () => {
                             data-placement="top"
                             title="View Call Details"
                           >
-                            <button className="btn btn-default">
+                            <button className="btn btn-default ">
                               <FontAwesomeIcon icon={faEye} />
                             </button>
                           </NavLink>

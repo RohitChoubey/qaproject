@@ -118,7 +118,7 @@ const AdminSetting = () => {
                         <td>{row.maxLimit}</td>
                         <td>
                           <button
-                            className="btn btn-info"
+                            className="btn btn-outline-info"
                             onClick={() => openModal(row)}
                             data-toggle="tooltip"
                             data-placement="top"

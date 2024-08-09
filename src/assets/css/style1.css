@@ -2046,7 +2046,7 @@ a {
   text-decoration: none !important;
 }
 
-.info-button {
+/* .info-button {
   background-color: transparent;
   border: none;
   cursor: pointer;
@@ -2060,7 +2060,7 @@ a {
   color: rgb(30, 136, 229);
   font-size: 19px;
   margin-right: 5px;
-}
+} */
 
 .pagination {
   cursor: pointer;
@@ -2124,7 +2124,6 @@ a {
 /* Styles for the pagination container */
 #page-numbers {
   display: flex;
-  justify-content: center;
   list-style-type: none;
   padding: 0;
   margin: 20px 0;
@@ -2191,6 +2190,9 @@ ol, ul {
   padding-left: 1rem !important;
 }
 
+.btn-outline-info :hover{
+  color: white;
+}
 /* =================================================================================== */
 .sidebar {
   position: fixed;
@@ -2201,4 +2203,81 @@ ol, ul {
   color: #fff;
   transition: transform 0.3s ease;
   
+}
+
+/* ====================================================================== */
+/* Enhanced styling for SweetAlert2 popup */
+.swal2-popup {
+  width: 90vw; /* Adjust width to fit content better */
+  max-width: 800px; /* Set a maximum width */
+  font-family: 'Arial', sans-serif;
+}
+
+.swal-custom-container {
+  font-family: 'Arial', sans-serif;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+}
+
+.swal-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.swal-header {
+  font-size: 22px;
+  font-weight: 600;
+  color: #007bff;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.swal-info {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.info-row:last-of-type {
+  border-bottom: none;
+}
+
+.info-row strong {
+  font-weight: 600;
+  color: #333;
+}
+
+.info-row span {
+  color: #555;
+}
+
+.swal-confirm-button {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 16px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.swal-confirm-button:hover {
+  background-color: #0056b3;
+  border-color: #004494;
+}
+
+.swal-confirm-button:focus {
+  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
 }

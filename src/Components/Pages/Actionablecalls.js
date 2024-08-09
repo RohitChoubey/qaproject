@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlay,
+  faPause,
+  faInfoCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { useReactToPrint } from "react-to-print";
 import axios from "axios";
 import AudioPlayer from "react-h5-audio-player";
@@ -17,7 +21,7 @@ export default function Actionablecalls() {
   const [eventId, setEventId] = useState(null);
   const itemsPerPage = 10;
 
-  useEffect(() => {
+   useEffect(() => {
     axios
       .get("https://jsonplaceholder.typicode.com/todos/")
       .then((response) => {
@@ -28,9 +32,7 @@ export default function Actionablecalls() {
           eventSubtype: "Car Accident",
           callTime: "2:10 min",
           reviewStatus: item.completed ? "Completed" : "Pending",
-          src: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${
-            (index % 16) + 1
-          }.mp3`,
+          src: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${(index % 16) + 1}.mp3`,
         }));
         setTableData(transformedData);
       })
@@ -43,7 +45,7 @@ export default function Actionablecalls() {
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     setPaginatedData(tableData.slice(indexOfFirstItem, indexOfLastItem));
-  }, [currentPage, tableData]);
+  }, [currentPage, tableData])
 
   const handlePlayPause = (src, id) => {
     if (currentAudio === src) {
@@ -156,6 +158,74 @@ export default function Actionablecalls() {
       });
   };
 
+  const handleInfoClick = (call) => {
+    Swal.fire({
+      title: "Call Information",
+      html: `
+        <div class="swal-custom-container">
+          <div class="swal-info">
+            <div class="info-row">
+              <strong>Additional Signal Info:</strong>
+              <span>${call.additionalSignalInfo || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Call Pick Duration:</strong>
+              <span>${call.callPickDuration || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Call Duration:</strong>
+              <span>${call.callDuration || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Event Registration Time:</strong>
+              <span>${call.eventRegistrationTime || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Priority:</strong>
+              <span>${call.priority || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>District:</strong>
+              <span>${call.district || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Victim Name:</strong>
+              <span>${call.victimName || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Victim Age:</strong>
+              <span>${call.victimAge || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Victim Gender:</strong>
+              <span>${call.victimGender || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Victim Address:</strong>
+              <span>${call.victimAddress || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Additional Information:</strong>
+              <span>${call.additionalInformation || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Near PS:</strong>
+              <span>${call.nearPS || "N/A"}</span>
+            </div>
+          </div>
+        </div>
+      `,
+
+      confirmButtonText: "Close",
+      customClass: {
+        container: "swal-custom-container",
+        title: "swal-title",
+        content: "swal-content",
+        confirmButton: "swal-confirm-button",
+      },
+    });
+  };
+
   return (
     <>
       <div className="main_content_iner overly_inner mt-5">
@@ -193,9 +263,9 @@ export default function Actionablecalls() {
                         <th scope="col">Sr. No</th>
                         <th scope="col">Event Type</th>
                         <th scope="col">Event Subtype</th>
-                        <th scope="col">Call Time</th>
+                        {/* <th scope="col">Call Time</th> */}
                         <th scope="col">Review Status</th>
-                        <th scope="col">Play</th>
+                        <th scope="col">Action </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -204,7 +274,7 @@ export default function Actionablecalls() {
                           <td>{file.id}</td>
                           <td>{file.eventType}</td>
                           <td>{file.eventSubtype}</td>
-                          <td>{file.callTime}</td>
+                          {/* <td>{file.callTime}</td> */}
                           <td>
                             <span
                               className={
@@ -219,25 +289,47 @@ export default function Actionablecalls() {
                             </span>
                           </td>
                           <td>
-                            <button
-                              className="btn btn-primary btn-circle"
-                              onClick={() => handlePlayPause(file.src, file.id)}
-                            >
-                              <FontAwesomeIcon
-                                icon={
-                                  isPlaying && currentAudio === file.src
-                                    ? faPause
-                                    : faPlay
+                            <div className="d-flex align-items-center">
+                              <button
+                                className="btn btn-outline-info me-2" // Added Bootstrap classes for styling and margin
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="Click here for more info"
+                                onClick={() => handleInfoClick(file)}
+                              >
+                                <FontAwesomeIcon
+                                  icon={faInfoCircle}
+                                  className="fa-info-circle"
+                                />
+                              </button>
+                              <button
+                                className="btn btn-outline-primary me-2"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="Click here play"
+                                onClick={() =>
+                                  handlePlayPause(file.src, file.id)
                                 }
-                              />
-                            </button>
+                              >
+                                <FontAwesomeIcon
+                                  icon={
+                                    isPlaying && currentAudio === file.src
+                                      ? faPause
+                                      : faPlay
+                                  }
+                                />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
 
-                  <ul id="page-numbers" className="pagination">
+                  <ul
+                    id="page-numbers"
+                    className="pagination justify-content-end"
+                  >
                     {renderPageNumbers()}
                   </ul>
                 </div>
@@ -245,7 +337,7 @@ export default function Actionablecalls() {
 
               <div className="col-lg-6 ">
                 <div className="white_card mb-20">
-                  <div className="audio-player-section p-5">
+                  <div className="audio-player-section p-20">
                     <AudioPlayer
                       src={currentAudio}
                       autoPlay={isPlaying}
@@ -257,7 +349,7 @@ export default function Actionablecalls() {
                   <div className="wrapper ml-3 white_card mb-20">
                     <div className="card-body">
                       <h3>Questionnaire</h3>
-                      <div className="form-group-row">
+                      {/* <div className="form-group-row">
                         <label className="col-12" htmlFor="signalInformation">
                           Signal Information
                         </label>
@@ -268,7 +360,7 @@ export default function Actionablecalls() {
                           value={eventId}
                           readOnly
                         ></textarea>
-                      </div>
+                      </div> */}
                       <div className="container">
                         <div className="row mb-3">
                           <div className="col-6">

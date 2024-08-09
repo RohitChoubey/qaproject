@@ -133,7 +133,7 @@ export default function PerformanceReport() {
         detailReport: (
           // <button onClick={() => handleDetailClick(item.loginId)}>
           <button
-            className="info-button"
+            className="btn btn-outline-info"
             data-toggle="tooltip"
             data-placement="top"
             title="Click here for more info"
