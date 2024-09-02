@@ -1,33 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
-import axios from "axios";
+import { getData, postData } from "../../utils/exportUtils"; // Adjust the import path as needed
 
 const AdminSetting = () => {
   const [showModal, setShowModal] = useState(false);
   const [percentage, setPercentage] = useState(0);
   const [maxLimit, setMaxLimit] = useState(0);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [tableData, setTableData] = useState([
-    { id: 1, callsType: "Actionable Calls", percentage: 5, maxLimit: 220 },
-    { id: 2, callsType: "Abusive Calls", percentage: 5, maxLimit: 220 },
-    { id: 3, callsType: "Missed Calls", percentage: 5, maxLimit: 220 },
-    { id: 4, callsType: "Non-Voice Signal", percentage: 5, maxLimit: 220 },
-    { id: 5, callsType: "No Response Calls", percentage: 5, maxLimit: 220 },
-    { id: 6, callsType: "Trip Monitoring Calls", percentage: 5, maxLimit: 220 },
-    { id: 7, callsType: "Feedback Calls", percentage: 5, maxLimit: 220 }
-    // Add more rows as needed
-  ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tableData, setTableData] = useState([]);
 
+  // Fetch signal types from the API when the component mounts
+  useEffect(() => {
+    const fetchSignalTypes = async () => {
+      try {
+        const data = await getData("/signal-types");
+        setTableData(data);
+      } catch (error) {
+        console.error("Error fetching signal types:", error);
+      }
+    };
+
+    fetchSignalTypes();
+  }, []);
+
+  // Open modal and populate fields with selected row data
   const openModal = (row) => {
     setSelectedRow(row);
-    setPercentage(row.percentage);
-    setMaxLimit(row.maxLimit);
+    setPercentage(row.percentage_of_calls_qa);
+    setMaxLimit(row.maximum_limit);
     setShowModal(true);
   };
 
+  // Close modal and reset fields
   const closeModal = () => {
     setShowModal(false);
     setSelectedRow(null);
@@ -35,37 +43,32 @@ const AdminSetting = () => {
     setMaxLimit(0);
   };
 
+  // Handle applying changes (update data via API and update UI)
   const handleApply = async () => {
-    if (selectedRow) {
-      try {
-        // Update the data in the database
-        await axios.put(`/api/update-call/${selectedRow.id}`, {
-          percentage,
-          maxLimit
-        });
+    if (!selectedRow || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await postData("/signal-types/", {
+        signal_type_id: selectedRow.signal_type_id,
+        percentage_of_calls_qa: percentage,
+        maximum_limit: maxLimit,
+      });
 
-        // Update the selected row with new values
-        const updatedTableData = tableData.map((row) =>
-          row.id === selectedRow.id ? { ...row, percentage, maxLimit } : row
-        );
+      // Update table data with new values
+      setTableData((prevData) =>
+        prevData.map((row) =>
+          row.signal_type_id === selectedRow.signal_type_id
+            ? { ...row, percentage_of_calls_qa: percentage, maximum_limit: maxLimit }
+            : row
+        )
+      );
 
-        // Update the state with the updated data
-        setTableData(updatedTableData);
-
-        Swal.fire({
-          icon: "success",
-          title: "Updated Successfully!",
-          text: `Percentage: ${percentage}, Max Limit: ${maxLimit}`
-        });
-
-        closeModal();
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Update Failed",
-          text: "There was an error updating the data. Please try again."
-        });
-      }
+      Swal.fire("Updated Successfully!", `Percentage: ${percentage}, Max Limit: ${maxLimit}`, "success");
+    } catch {
+      Swal.fire("Update Failed", "There was an error updating the data. Please try again.", "error");
+    } finally {
+      setIsSubmitting(false);
+      closeModal();
     }
   };
 
@@ -110,25 +113,33 @@ const AdminSetting = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {tableData.map((row, index) => (
-                      <tr key={row.id}>
-                        <td>{index + 1}</td>
-                        <td>{row.callsType}</td>
-                        <td>{row.percentage}</td>
-                        <td>{row.maxLimit}</td>
-                        <td>
-                          <button
-                            className="btn btn-outline-info"
-                            onClick={() => openModal(row)}
-                            data-toggle="tooltip"
-                            data-placement="top"
-                            title="Edit Call Details"
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </button>
+                    {tableData.length > 0 ? (
+                      tableData.map((row, index) => (
+                        <tr key={row.signal_type_id}>
+                          <td>{index + 1}</td>
+                          <td>{row.signal_type}</td>
+                          <td>{row.percentage_of_calls_qa}</td>
+                          <td>{row.maximum_limit}</td>
+                          <td>
+                            <button
+                              className="btn btn-outline-info"
+                              onClick={() => openModal(row)}
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Edit Call Details"
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center">
+                          No records found
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -141,29 +152,20 @@ const AdminSetting = () => {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">
-                    Edit Settings - {selectedRow.callsType}
-                  </h5>
-                  <button
-                    type="button"
-                    className="close"
-                    onClick={closeModal}
-                    aria-label="Close"
-                  >
+                  <h5 className="modal-title">Edit Settings - {selectedRow.signal_type}</h5>
+                  <button type="button" className="close" onClick={closeModal} aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>
                 </div>
                 <div className="modal-body">
                   <div className="form-group">
-                    <label htmlFor="percentage">
-                      Percentage of Calls for QA:
-                    </label>
+                    <label htmlFor="percentage">Percentage of Calls for QA:</label>
                     <input
                       type="number"
                       className="form-control"
                       id="percentage"
                       value={percentage}
-                      onChange={(e) => setPercentage(e.target.value)}
+                      onChange={(e) => setPercentage(+e.target.value)}
                     />
                   </div>
                   <div className="form-group">
@@ -173,24 +175,21 @@ const AdminSetting = () => {
                       className="form-control"
                       id="maxLimit"
                       value={maxLimit}
-                      onChange={(e) => setMaxLimit(e.target.value)}
+                      onChange={(e) => setMaxLimit(+e.target.value)}
                     />
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={closeModal}
-                  >
+                  <button type="button" className="btn btn-secondary" onClick={closeModal}>
                     Cancel
                   </button>
                   <button
                     type="button"
                     className="btn btn-primary"
                     onClick={handleApply}
+                    disabled={isSubmitting}
                   >
-                    Apply
+                    {isSubmitting ? "Submitting..." : "Apply"}
                   </button>
                 </div>
               </div>

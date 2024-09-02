@@ -3,9 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { faDownload, faSearch, faSortDown, faEdit,} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Form } from "react-bootstrap";
+import axios from "axios";
 import BootstrapTable from "react-bootstrap-table-next";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { exportToExcel, exportToPDF,fetchPerformanceData } from "../../utils/exportUtils";
+import { exportToExcel, exportToPDF } from "../../utils/exportUtils";
 
 export default function PerformanceReport() {
   const navigate = useNavigate();
@@ -22,9 +23,9 @@ export default function PerformanceReport() {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const [noDataMessage, setNoDataMessage] = useState("");
   const [showTable, setShowTable] = useState(false); // Control table visibility
-  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
-  const [filteredData, setFilteredData] = useState(tableData);
+  const [searchTerm, setSearchTerm] = useState("");
 
+  
   const handleFromDateChange = (e) => setFromDate(e.target.value);
   const handleToDateChange = (e) => setToDate(e.target.value);
   const handleShiftChange = (e) => setSelectedShift(e.target.value);
@@ -118,32 +119,80 @@ export default function PerformanceReport() {
   // State for dynamic columns
   const [columns, setColumns] = useState(columnsCO);
 
+  // Utility function to convert milliseconds to MM:SS format
+  const formatDurationMinutesSeconds = (millis) => {
+    let seconds = Math.floor((millis / 1000) % 60);
+    let minutes = Math.floor((millis / (1000 * 60)) % 60);
+
+    // Pad with zeroes if necessary
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+    return `${minutes}:${seconds}`;
+  };
+
+
   // Ref to track initial load
   const isInitialLoad = useRef(true);
 
-  const fetchData = async (page) => {
-    setLoading(true);
-    setNoDataMessage("");
+  const fetchData = async (page, reportType, fromDate, toDate, selectedShift ) => {
+    setLoading(true); // Start loading
+    setNoDataMessage(""); // Clear any previous messages
     try {
-      const data = await fetchPerformanceData(page, reportType, fromDate, toDate, selectedShift, itemsPerPage);
+      const startDate = fromDate || new Date().toISOString().split("T")[0];
+      const endDate = toDate || new Date().toISOString().split("T")[0];
+      setToDate(endDate);
+
+      // Construct the API URL based on report type and date range
+      // const apiUrl = `/api/users/co-qa-data?reportType=${
+      //   reportType === "SCO Performance" ? "SCO" : "CO"
+      // }&startDate=${startDate}&endDate=${startDate}${
+      //   selectedShift ? `&shift=${selectedShift}` : ""
+      // }`;
+
+      const apiUrl = `/api/users/co-qa-data?reportType=${
+        reportType === "SCO Performance" ? "SCO" : "CO"
+      }&startDate=${startDate}&endDate=${endDate}`;
+      
+      const { data } = await axios.get(apiUrl);
+
+      // Check if data is empty and update accordingly
       if (data.length === 0) {
-        setNoDataMessage("No record found on the selected dates. Please change the From Date and To Date.");
+        setNoDataMessage(
+          "No record found on the selected dates. Please change the From Date and To Date."
+        );
         setTableData([]);
-        setShowTable(false);
+        setShowTable(false); // Hide table if no data found
       } else {
-        setTableData(data);
-        setTotalItems(data.length);
-        setShowTable(true);
+        // Format and paginate the data
+        const dataWithFormattedCallDuration = data.map((item, index) => ({
+          ...item,
+          srNo: index + 1 + (page - 1) * itemsPerPage, // SR No starts from 1 and increments
+          average_call_duration_millis: formatDurationMinutesSeconds(
+            item.average_call_duration_millis
+          ),
+          call_duration_millis: formatDurationMinutesSeconds(
+            item.call_duration_millis
+          ),
+        }));
+
+        // Update table data and total items
+        setTableData(
+          dataWithFormattedCallDuration.slice(
+            (page - 1) * itemsPerPage,
+            page * itemsPerPage
+          )
+        );
+        setTotalItems(data.length); // Update total items
+        setShowTable(true); // Show table after fetching data
       }
     } catch (error) {
       console.error("Error fetching data:", error);
       setNoDataMessage("An error occurred while fetching data.");
-      setShowTable(false);
+      setShowTable(false); // Hide table on error
     }
-    setLoading(false);
+    setLoading(false); // Stop loading
   };
-  
-
 
   useEffect(() => {
     setShowTable(reportType !== "SCO Performance");
@@ -196,23 +245,31 @@ export default function PerformanceReport() {
     fetchData(1, reportType, fromDate, toDate, selectedShift); // Call fetchData with current parameters
   };
 
-    
-  // Modify handleSearch to include the search query
-  // const handleSearchQuery = () => {
-  //   setCurrentPage(1); // Reset to first page
-  //   fetchData(1, reportType, fromDate, toDate, selectedShift, searchQuery);
-  // };
+  
 
-  useEffect(() => {
-    // Filter tableData based on searchQuery
-    const filtered = tableData.filter(item => 
-      Object.values(item).some(value =>
-        value ? value.toString().toLowerCase().includes(searchQuery.toLowerCase()) : false
-      )
-    );
-    setFilteredData(filtered); // Update filtered data
-  }, [searchQuery, tableData]);
+  // Debounced function to optimize search performance
+  const debouncedSearch = useCallback(
+    debounce((term) => {
+      onSearch(term);
+    }, 300), // 300ms delay for debouncing
+    [onSearch]
+  );
+   // Handle change in search input
+   const handleSearchChange = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    debouncedSearch(term); // Call debounced search function
+  };
 
+
+  // Debounce function to limit how often a function is called
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
 
   return (
     <div>
@@ -237,15 +294,19 @@ export default function PerformanceReport() {
               </div>
             </div>
           </div>
-              <div className="ml-lg-auto p-lg-5 w-25" style={{ marginBottom: '-118px' }}>
-              <Form.Control
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-              </div>
           <div className="row mb-3 mt-5 align-items-center">
+              <h3 className="text-xxl-end">
+              <Form>
+      <InputGroup className="mb-3">
+        <Form.Control
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </InputGroup>
+    </Form>
+              </h3>
             <div className="col-lg-2 col-md-6 col-sm-6">
               <Form.Group controlId="reportTypeSelect">
                 <Form.Label>Select Report Type</Form.Label>

@@ -3,13 +3,14 @@ import { BrowserRouter as Router, Route, Routes, Navigate, redirect } from "reac
 import Login from "./Components/Login/Login";
 
 // Lazy loading components
-const Actionablecalls = lazy(() => import("./Components/Pages/Actionablecalls"));
+const Calldata = lazy(() => import("./Components/Pages/Calldata"));
 const Performancereport = lazy(() => import("./Components/Pages/Performancereport"));
 const Detailedreport = lazy(() => import("./Components/Pages/Detailedreport"));
 const Adminsetting = lazy(() => import("./Components/Pages/Adminsetting"));
 const Dashboard = lazy(() => import("./Components/Pages/Dashboard"));
 const Navbar = lazy(() => import("./Components/Pages/Navbar"));
 const Sidebar = lazy(() => import("./Components/Pages/Sidebar"));
+const Error = lazy(()=> import("./Components/Pages/Error"));
 
 // Lazy loading FontAwesomeIcon and faSpinner
 const LazyFontAwesomeIcon = lazy(() => import("@fortawesome/react-fontawesome").then(module => ({ default: module.FontAwesomeIcon })));
@@ -34,11 +35,11 @@ const MainLayout = ({ isSidebarOpen, toggleSidebar, logout }) => {
       >
         <Routes>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/actionablecalls" element={<Actionablecalls />} />
+          <Route path="/calldata" element={<Calldata />} />
           <Route path="/performancereport" element={<Performancereport />} />
           <Route path="/detailedreport/:loginId" element={<Detailedreport />} />
           <Route path="/adminsetting" element={<Adminsetting />} />
-          <Route path="*" element={<div>404 - Page Not Found</div>} /> {/* Add a 404 page */}
+          <Route path="*" element={<Error />} />
         </Routes>
       </section>
     </>

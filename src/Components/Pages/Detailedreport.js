@@ -3,111 +3,115 @@ import { useParams, useLocation, Link } from "react-router-dom";
 import BootstrapTable from "react-bootstrap-table-next";
 import { faDownload, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { exportToExcel, exportToPDF, goBack } from "../../utils/exportUtils"; // Import the functions
+import {
+  exportToExcel,
+  exportToPDF,
+  goBack,
+  getData,
+} from "../../utils/exportUtils";
 
 const DetailedReport = () => {
-  const { loginId } = useParams();
-  const location = useLocation();
-  const { fromDate, toDate } = location.state || {};
+  const { loginId } = useParams(); // Get loginId from URL parameters
+  const { fromDate, toDate } = useLocation().state || {}; // Extract fromDate and toDate from location state
+
+  // State variables
   const [tableData, setTableData] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
   const [loading, setLoading] = useState(false);
+
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const today = new Date();
+  const today = new Date().toISOString().split("T")[0];
   const defaultFromDate = fromDate || today;
   const defaultToDate = toDate || today;
+
+  // Define the columns for the table
   const columns = [
-    { dataField: "id", text: "Sr. No." },
-    { dataField: "eventType", text: "Event Type" },
-    { dataField: "eventSubtype", text: "Event Subtype" },
-    { dataField: "callDuration", text: "Call Duration" },
-    { dataField: "reviewStatus", text: "Review Status" },
-    { dataField: "callType", text: "Call Type" },
-    { dataField: "complianceScore", text: "Compliance of SOP QA Score" },
+    { dataField: "id", text: "Sr. No." }, // Serial number column
+    { dataField: "sco_employee_code", text: "SCO Employee Code" }, // SCO Employee Code column
+    { dataField: "co_name", text: "CO Name" }, // CO Name column
+    { dataField: "co_employee_code", text: "CO Employee Code" }, // CO Employee Code column
     {
-      dataField: "activeListeningScore",
-      text: "Active Listening & proper response QA Score",
-    },
-    {
-      dataField: "detailsCapturingScore",
-      text: "Correct and relevant details capturing QA Score",
-    },
-    {
-      dataField: "addressTaggingScore",
-      text: "Correct Address tagging QA Score",
-    },
-    { dataField: "callHandledTime", text: "Call Handled Time QA time" },
+      dataField: "sco_qa_time",
+      text: "SCO QA Time",
+      formatter: (cell) => {
+        // Convert sco_qa_time (in seconds) to min:second format
+        const minutes = Math.floor(cell / 60);
+        const seconds = cell % 60;
+        return `${minutes}:${seconds < 10 ? "00" : ""}${seconds}`;
+      },
+    }, // SCO QA Time column with custom formatter
+    { dataField: "sop_score", text: "SOP Score" }, // SOP Score column
+    { dataField: "active_listening_score", text: "Active Listening" }, // Active Listening Score column
+    { dataField: "relevent_detail_score", text: "Relevant Detail" }, // Relevant Detail Score column
+    { dataField: "address_tagging_score", text: "Address Tagging" }, // Address Tagging Score column
+    { dataField: "call_handled_time_score", text: "Call Handled Time" }, // Call Handled Time Score column
+    { dataField: "sco_remarks", text: "Remarks" }, // Remarks column
   ];
 
+  // Fetch data when component mounts or dependencies change
   useEffect(() => {
     fetchData(currentPage, loginId, defaultFromDate, defaultToDate);
   }, [loginId, defaultFromDate, defaultToDate, currentPage]);
 
-  const apiUrl = `https://jsonplaceholder.typicode.com/todos`;
-
-  const transformData = (data, page) => {
-    return data.map((item, index) => ({
-      ...item,
-      id: index + 1 + (page - 1) * itemsPerPage,
-      eventType: item.title,
-      eventSubtype: "Subtype" + index,
-      callDuration: "00:0" + index,
-      reviewStatus: item.completed,
-      callType: "Type",
-      complianceScore: item.id,
-      activeListeningScore: 85 + index,
-      detailsCapturingScore: 90 + index,
-      addressTaggingScore: 95 + index,
-      callHandledTime: "00:1" + index,
-    }));
-  };
-
-  const fetchData = async (page, loginId, defaultFromDate, defaultToDate) => {
+  // Function to fetch data from API
+  // Function to fetch data from the API
+  const fetchData = async (page, loginId, fromDate, toDate, itemsPerPage) => {
+    // Construct the API URL with query parameters
+    const dataUrl = `/sco-detailed-data?scoEmployeeCode=${loginId}&startDate=${fromDate}&endDate=${toDate}`;
+  
     try {
-      const response = await fetch(
-        `${apiUrl}?userId=${loginId}&fromDate=${encodeURIComponent(
-          defaultFromDate
-        )}&toDate=${encodeURIComponent(defaultToDate)}`
+      // Fetch data from the API using the getData function
+      const data = await getData(dataUrl);
+  
+      // Transform the data to include Sr. No. and other necessary modifications
+      const transformedData = data.map((item, index) => ({
+        ...item,
+        id: index + 1 + (page - 1) * itemsPerPage, // Generate Sr. No. based on page and index
+        sco_qa_time: item.sco_qa_time, // Ensure sco_qa_time is available for formatter
+      }));
+  
+      // Set the paginated data for the current page
+      setTableData(
+        transformedData.slice((page - 1) * itemsPerPage, page * itemsPerPage)
       );
-      const data = await response.json();
-      const transformedData = transformData(data, page);
-      const slicedData = transformedData.slice(
-        (page - 1) * itemsPerPage,
-        page * itemsPerPage
-      );
-      setTableData(slicedData);
-      setTotalItems(transformedData.length); // Set the total count based on all items fetched
+  
+      // Set the total number of items for pagination
+      setTotalItems(transformedData.length);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      // The error handling is already managed by getData, 
+      // so you may not need additional error handling here
+      console.error("Error fetching data:", error); // Optional: log error for debugging
     }
   };
-
+  
+  // Handle export (PDF/Excel)
   const handleExport = async (type) => {
-    const dataUrl = `${apiUrl}?userId=${loginId}&fromDate=${encodeURIComponent(
+    const dataUrl = `/sco-detailed-data?scoEmployeeCode=${loginId}&startDate=${encodeURIComponent(
       defaultFromDate
-    )}&toDate=${encodeURIComponent(defaultToDate)}`;
-    console.log(dataUrl);
+    )}&endDate=${encodeURIComponent(defaultToDate)}`;
     try {
       setLoading(true);
-      console.log("Export data URL:", dataUrl);
-      console.log("Columns for export:", columns);
       if (type === "pdf") {
         await exportToPDF(dataUrl, columns, "Detailed_report.pdf");
-      } else if (type === "excel") {
+      } else {
         await exportToExcel(dataUrl, columns, "Detailed_report.xlsx");
       }
     } catch (error) {
       console.error(`Error exporting ${type}:`, error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
+  // Format date to readable format
   const formatDate = (dateString) => {
-    const dateObj = new Date(dateString);
-    const options = { month: "long", day: "numeric", year: "numeric" };
-    return dateObj.toLocaleDateString("en-GB", options);
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   return (
@@ -117,9 +121,7 @@ const DetailedReport = () => {
           <div className="col-12">
             <div className="page_title_box d-flex align-items-center justify-content-between">
               <div className="page_title_left">
-                <h3 className="f_s_30 f_w_700 text_white">
-                  SCO Detail Report
-                </h3>
+                <h3 className="f_s_30 f_w_700 text_white">SCO Detail Report</h3>
                 <ol className="breadcrumb page_bradcam mb-0">
                   <li className="breadcrumb-item">
                     <Link to="/dashboard">Performance Report</Link>
@@ -156,8 +158,7 @@ const DetailedReport = () => {
                     title="Back to Previous Page"
                     onClick={goBack}
                   >
-                    {" "}
-                    <FontAwesomeIcon icon={faArrowLeft} />{" "}
+                    <FontAwesomeIcon icon={faArrowLeft} />
                   </button>{" "}
                   &ensp;
                   <button
@@ -193,7 +194,6 @@ const DetailedReport = () => {
                       color: "#fff",
                       width: "30%",
                     }}
-                    variant="success"
                     onClick={() => handleExport("excel")}
                     disabled={loading}
                   >
@@ -214,7 +214,6 @@ const DetailedReport = () => {
                   </button>
                 </div>
               </div>
-
               <div className="table-responsive ml-5">
                 <BootstrapTable
                   keyField="id"
@@ -228,53 +227,49 @@ const DetailedReport = () => {
             </div>
           </div>
         </div>
-
-     
         <div className="row">
-      <div className="col-12">
-        <ul id="page-numbers" className="justify-content-end pagination mr-5">
-          {/* Previous Button */}
-          <li
-            className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}
-            onClick={() => {
-              if (currentPage > 1) setCurrentPage(currentPage - 1);
-            }}
-          >
-            <span>&laquo;</span>
-          </li>
-
-          {/* Page Numbers */}
-          {Array.from({ length: totalPages }, (_, index) => {
-            // Calculate range to display only 5 pages at a time
-            const startPage = currentPage <= 3 ? 0 : currentPage - 3;
-            const endPage = startPage + 5 >= totalPages ? totalPages : startPage + 5;
-
-            if (index >= startPage && index < endPage) {
-              return (
-                <li
-                  key={index + 1}
-                  className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(index + 1)}
-                >
-                  <span>{index + 1}</span>
-                </li>
-              );
-            }
-            return null;
-          })}
-
-          {/* Next Button */}
-          <li
-            className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}
-            onClick={() => {
-              if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-            }}
-          >
-            <span>&raquo;</span>
-          </li>
-        </ul>
-      </div>
-    </div>
+          <div className="col-12">
+            <ul
+              id="page-numbers"
+              className="justify-content-end pagination mr-5"
+            >
+              <li
+                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                onClick={() =>
+                  currentPage > 1 && setCurrentPage(currentPage - 1)
+                }
+              >
+                <span>&laquo;</span>
+              </li>
+              {Array.from({ length: totalPages }, (_, index) => {
+                const startPage = currentPage <= 3 ? 0 : currentPage - 3;
+                const endPage =
+                  startPage + 5 >= totalPages ? totalPages : startPage + 5;
+                return index >= startPage && index < endPage ? (
+                  <li
+                    key={index + 1}
+                    className={`page-item ${
+                      index + 1 === currentPage ? "active" : ""
+                    }`}
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    <span>{index + 1}</span>
+                  </li>
+                ) : null;
+              })}
+              <li
+                className={`page-item ${
+                  currentPage === totalPages ? "disabled" : ""
+                }`}
+                onClick={() =>
+                  currentPage < totalPages && setCurrentPage(currentPage + 1)
+                }
+              >
+                <span>&raquo;</span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );

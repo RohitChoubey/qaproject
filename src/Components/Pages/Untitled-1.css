@@ -1,0 +1,99 @@
+
+
+/* ======================================================================================================= */
+
+/* Styles for the pagination container */
+#page-numbers {
+  display: flex;
+  justify-content: center;
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+/* Styles for pagination buttons */
+#page-numbers li {
+  margin: 0 5px;
+  width: 40px; /* Set the width for a circular shape */
+  height: 40px; /* Set the height for a circular shape */
+  line-height: 40px; /* Center the text vertically */
+  border: 1px solid #ddd;
+  border-radius: 50%; /* Make the button circular */
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center; /* Center the text horizontally */
+  transition: all 0.3s ease;
+  background: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Active page styles */
+#page-numbers li.active {
+  background: linear-gradient(145deg, #007bff, #0056b3);
+  color: white;
+  border: 1px solid #0056b3;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover effect */
+#page-numbers li:hover {
+  background-color: #e2e6ea;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Disabled styles */
+#page-numbers li.disabled {
+  cursor: not-allowed;
+  color: #aaa;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  box-shadow: none;
+}
+
+/* Previous and Next buttons styles */
+#page-numbers li:first-child,
+#page-numbers li:last-child {
+  font-weight: bold;
+  font-size: 16px;
+  background-color: #f0f0f0;
+  width: 41px;
+  height: 40px;
+  border-radius: 50%; 
+}
+
+#page-numbers li:first-child:hover,
+#page-numbers li:last-child:hover {
+  background-color: #e2e6ea;
+}
+
+
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  color: #fff;
+  transition: transform 0.3s ease;
+
+}
+
+
+.sidebar {
+  height: 100vh;
+  left: 0;
+  top: 0;
+  padding-bottom: 50px;
+  position: fixed;
+  width: 270px;
+  z-index: 999;
+  overflow: hidden;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+  background: #fff;
+  color: #fff;
+  box-shadow: 0 12px 30px rgb(80, 143, 244, 0.1);
+}

@@ -6,7 +6,7 @@ import policeImage from "../../assets/img/hr_police2.png";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
-  const isDashboardActive = location.pathname === '/dashboard' || location.pathname.includes('/actionablecalls');
+  const isDashboardActive = location.pathname === '/dashboard' || location.pathname.includes('/calldata');
   const isPerformanceReportActive = location.pathname === '/performancereport' || location.pathname.includes('/detailedreport');
   const isAdminSettingActive = location.pathname === '/adminsetting';
 
