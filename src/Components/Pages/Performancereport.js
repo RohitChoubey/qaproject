@@ -1,11 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
-import { faDownload, faSearch, faSortDown, faEdit,} from "@fortawesome/free-solid-svg-icons";
+import {
+  faDownload,
+  faSearch,
+  faSortDown,
+  faEdit,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Form } from "react-bootstrap";
 import BootstrapTable from "react-bootstrap-table-next";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { exportToExcel, exportToPDF,fetchPerformanceData } from "../../utils/exportUtils";
+import {
+  exportToExcel,
+  exportToPDF,
+  fetchPerformanceData,
+} from "../../utils/exportUtils";
 
 export default function PerformanceReport() {
   const navigate = useNavigate();
@@ -28,7 +37,7 @@ export default function PerformanceReport() {
   const handleFromDateChange = (e) => setFromDate(e.target.value);
   const handleToDateChange = (e) => setToDate(e.target.value);
   const handleShiftChange = (e) => setSelectedShift(e.target.value);
-  
+
   // Define columns for "SCO Performance"
   const columnsCO = [
     { dataField: "srNo", text: "Sr. No" },
@@ -107,8 +116,10 @@ export default function PerformanceReport() {
           data-toggle="tooltip"
           data-placement="top"
           title="Edit Call Details"
-          onClick={() => handleDetailClick(row.sco_employee_code, fromDate, toDate)}
-          >
+          onClick={() =>
+            handleDetailClick(row.sco_employee_code, fromDate, toDate)
+          }
+        >
           <FontAwesomeIcon icon={faEdit} />
         </button>
       ),
@@ -125,9 +136,18 @@ export default function PerformanceReport() {
     setLoading(true);
     setNoDataMessage("");
     try {
-      const data = await fetchPerformanceData(page, reportType, fromDate, toDate, selectedShift, itemsPerPage);
+      const data = await fetchPerformanceData(
+        page,
+        reportType,
+        fromDate,
+        toDate,
+        selectedShift,
+        itemsPerPage
+      );
       if (data.length === 0) {
-        setNoDataMessage("No record found on the selected dates. Please change the From Date and To Date.");
+        setNoDataMessage(
+          "No record found on the selected dates. Please change the From Date and To Date."
+        );
         setTableData([]);
         setShowTable(false);
       } else {
@@ -142,8 +162,6 @@ export default function PerformanceReport() {
     }
     setLoading(false);
   };
-  
-
 
   useEffect(() => {
     setShowTable(reportType !== "SCO Performance");
@@ -161,14 +179,14 @@ export default function PerformanceReport() {
   const handleDetailClick = (loginId, fromDate, toDate) => {
     navigate(`/detailedreport/${loginId}`, { state: { fromDate, toDate } });
   };
- 
+
   // Handle export for both PDF and Excel
   const handleExport = async (type) => {
-     const apiUrl = `/api/users/co-qa-data?reportType=${
-        reportType === "SCO Performance" ? "SCO" : "CO"
-      }&startDate=${fromDate}&endDate=${toDate}${
-        selectedShift ? `&shift=${selectedShift}` : ""
-      }`;
+    const apiUrl = `/co-qa-data?reportType=${
+      reportType === "SCO Performance" ? "SCO" : "CO"
+    }&startDate=${fromDate}&endDate=${toDate}${
+      selectedShift ? `&shift=${selectedShift}` : ""
+    }`;
     try {
       setLoading(true);
       if (type === "pdf") {
@@ -196,23 +214,30 @@ export default function PerformanceReport() {
     fetchData(1, reportType, fromDate, toDate, selectedShift); // Call fetchData with current parameters
   };
 
-    
   // Modify handleSearch to include the search query
   // const handleSearchQuery = () => {
   //   setCurrentPage(1); // Reset to first page
   //   fetchData(1, reportType, fromDate, toDate, selectedShift, searchQuery);
   // };
 
-  useEffect(() => {
-    // Filter tableData based on searchQuery
-    const filtered = tableData.filter(item => 
-      Object.values(item).some(value =>
-        value ? value.toString().toLowerCase().includes(searchQuery.toLowerCase()) : false
-      )
-    );
-    setFilteredData(filtered); // Update filtered data
-  }, [searchQuery, tableData]);
+  // Filtering data based on search query
 
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      // If searchQuery is empty, show full tableData
+      setFilteredData(tableData);
+    } else {
+      // Filter data
+      const filtered = tableData.filter((item) =>
+        Object.values(item).some((value) =>
+          value
+            ? value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+            : false
+        )
+      );
+      setFilteredData(filtered);
+    }
+  }, [searchQuery, tableData]);
 
   return (
     <div>
@@ -237,14 +262,17 @@ export default function PerformanceReport() {
               </div>
             </div>
           </div>
-              <div className="ml-lg-auto p-lg-5 w-25" style={{ marginBottom: '-118px' }}>
-              <Form.Control
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-              </div>
+          <div
+            className="ml-lg-auto p-lg-5 w-25"
+            style={{ marginBottom: "-118px" }}
+          >
+            <Form.Control
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <div className="row mb-3 mt-5 align-items-center">
             <div className="col-lg-2 col-md-6 col-sm-6">
               <Form.Group controlId="reportTypeSelect">
@@ -289,7 +317,9 @@ export default function PerformanceReport() {
                   value={selectedShift}
                 >
                   <option value="">-- Select Shift --</option>
-                  <option value="all" active>All</option>
+                  <option value="all" active>
+                    All
+                  </option>
                   <option value="morning">Morning</option>
                   <option value="afternon">Afternon/Evening</option>
                   <option value="night">Night</option>

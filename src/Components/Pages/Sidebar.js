@@ -9,6 +9,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const isDashboardActive = location.pathname === '/dashboard' || location.pathname.includes('/calldata');
   const isPerformanceReportActive = location.pathname === '/performancereport' || location.pathname.includes('/detailedreport');
   const isAdminSettingActive = location.pathname === '/adminsetting';
+  const role = localStorage.getItem("role");
+
 
   return (
     <nav className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
@@ -30,7 +32,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             <span>Dashboard</span>
           </NavLink>
         </li>
-        <li>
+        <li style={{ display: role === "admin" ? "none" : "block" }}>
           <NavLink
             to="/performancereport"
             className={isPerformanceReportActive ? "mm-active active" : ""}
@@ -41,7 +43,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             <span>Performance Report</span>
           </NavLink>
         </li>
-        <li>
+        <li style={{ display: role === "admin" ? "none" : "block" }}>
           <NavLink
             to="/adminsetting"
             className={isAdminSettingActive ? "mm-active active" : ""}

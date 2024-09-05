@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faPlay, faPause, faInfoCircle,} from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlay,
+  faPause,
+  faInfoCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css"; // Ensure this CSS is imported
 import Swal from "sweetalert2";
-import {getData, formatDurationMinutesSeconds, postData,} from "../../utils/exportUtils";
+import {
+  getData,
+  formatDurationMinutesSeconds,
+  postData,
+} from "../../utils/exportUtils";
 
 export default function Callsdata() {
   const [tableData, setTableData] = useState([]);
@@ -24,6 +32,9 @@ export default function Callsdata() {
   const query = new URLSearchParams(useLocation().search);
   const signal_type = query.get("signal_type");
   const callType = query.get("type");
+
+  const AUDIO_BASE_URL = 'http://10.26.0.8:8080/ACDSAdmin-1.2/AudioDownloadServlet?absoluteFileName=';
+  const role = localStorage.getItem("role");
 
   // Initial form field values
   const initialAnswers = {
@@ -45,31 +56,33 @@ export default function Callsdata() {
       try {
         // Use the getData function to fetch the data
         const response = await getData(
-          `/call-data?page=${currentPage}&limit=${itemsPerPage}&signalType=${signal_type}`
+          `/qaAPI/api/user/call-data?page=${currentPage}&limit=${itemsPerPage}&signalType=${signal_type}`
         );
         if (response && Array.isArray(response)) {
           const transformedData = response.map((item) => ({
-            id: item.id,
-            eventId: item.event_id,
-            eventType: item.event_maintype,
-            eventSubtype: item.event_subtype,
-            reviewStatus: item.review_status,
-            src: item.voice_path,
-            callDuration: formatDurationMinutesSeconds(
-              item.call_duration_millis
-            ),
-            signal_id: item.signal_id,
-            call_pick_duration_millis: item.call_pick_duration_millis,
-            event_registration_time: item.event_registration_time,
-            priority: item.priority,
-            district_code: item.district_code,
-            victim_name: item.victim_name,
-            victim_age: item.victim_age,
-            victim_gender: item.victim_gender,
-            victim_address: item.victim_address,
-            addl_info: item.addl_info,
-            near_ps: item.near_ps,
-          }));
+    id: item.id,
+    eventId: item.event_id,
+    eventType: item.event_maintype,
+    eventSubtype: item.event_subtype,
+    reviewStatus: item.review_status,
+    src1: item.voice_path,
+    src: `${AUDIO_BASE_URL}${item.voice_path}`, // Corrected line
+    callDuration: formatDurationMinutesSeconds(
+        item.call_duration_millis
+    ),
+    signal_id: item.signal_id,
+    call_pick_duration_millis: item.call_pick_duration_millis,
+    event_registration_time: item.event_registration_time,
+    priority: item.priority,
+    district_code: item.district_code,
+    victim_name: item.victim_name,
+    victim_age: item.victim_age,
+    victim_gender: item.victim_gender,
+    victim_address: item.victim_address,
+    addl_info: item.addl_info,
+    near_ps: item.near_ps,
+}));
+
 
           setTableData(transformedData);
         } else {
@@ -101,25 +114,24 @@ export default function Callsdata() {
   // Handle play/pause action for the audio
   const handlePlayPause = (src, id) => {
     if (currentAudio === src) {
-        // If the same audio is clicked, just toggle play/pause
-        setIsPlaying(!isPlaying);
+      // If the same audio is clicked, just toggle play/pause
+      setIsPlaying(!isPlaying);
     } else {
-        // Reset the timer when switching to a different audio
-        clearInterval(timerRef.current);  // Clear the previous timer
-        setTimer(0);  // Reset the timer to 0
+      // Reset the timer when switching to a different audio
+      clearInterval(timerRef.current); // Clear the previous timer
+      setTimer(0); // Reset the timer to 0
 
-        // Start the timer for the new audio
-        timerRef.current = setInterval(() => {
-            setTimer(prevTimer => prevTimer + 1);
-        }, 1000); // Increment timer every second
+      // Start the timer for the new audio
+      timerRef.current = setInterval(() => {
+        setTimer((prevTimer) => prevTimer + 1);
+      }, 1000); // Increment timer every second
 
-        // Set the new audio source and start playing
-        setCurrentAudio(src);
-        setIsPlaying(true);
-        setSignalId(id);
+      // Set the new audio source and start playing
+      setCurrentAudio(src);
+      setIsPlaying(true);
+      setSignalId(id);
     }
-};
-
+  };
 
   const renderPageNumbers = () => {
     const totalPages = Math.ceil(tableData.length / itemsPerPage);
@@ -248,7 +260,7 @@ export default function Callsdata() {
       html: `
           <div class="swal-custom-container">
             <div class="swal-info">
-              <div class="info-row">
+              <div class="info-row" style={{ display: role === "admin" ? "none" : "block" }}>>
                 <strong>Signal Information:</strong>
                 <span>${call.signal_id || "N/A"}</span>
               </div>
@@ -379,68 +391,71 @@ export default function Callsdata() {
                       </tr>
                     </thead>
                     <tbody>
-                    {paginatedData.map((call, index) => {
-  const reviewStatus = call.reviewStatus ? call.reviewStatus.toLowerCase() : "";
-  const isCompleted = reviewStatus === "completed";
-  const isPending = reviewStatus === "pending";
-  const isPlayingCurrent = isPlaying && currentAudio === call.src;
+                      {paginatedData.map((call, index) => {
+                        const reviewStatus = call.reviewStatus
+                          ? call.reviewStatus.toLowerCase()
+                          : "";
+                        const isCompleted = reviewStatus === "completed";
+                        const isPending = reviewStatus === "pending";
+                        const isPlayingCurrent =
+                          isPlaying && currentAudio === call.src;
 
-  return (
-    <tr
-      key={call.id}
-      style={{
-        backgroundColor: isCompleted ? "#055160" : "",
-        color: isCompleted ? "#ffffff" : "" // Set text color to white for contrast
-      }}
-    >
-      <td>{index + 1}</td>
-      <td>{call.eventType}</td>
-      <td>{call.eventSubtype}</td>
-      <td>{call.callDuration}</td>
-      <td>
-        <span
-          className={
-            isPending
-              ? "text-danger font-weight-bold"
-              : isCompleted
-              ? "text-success font-weight-bold" // Ensure .text-success applies green color
-              : ""
-          }
-        >
-          {call.reviewStatus}
-        </span>
-      </td>
-      <td>
-        <div className="d-flex align-items-center">
-          <button
-            className="btn btn-outline-info me-2"
-            onClick={() => handleInfoClick(call)}
-            disabled={isCompleted} // Disable when completed
-          >
-            <FontAwesomeIcon icon={faInfoCircle} />
-          </button>
-          <button
-            onClick={() => {
-              if (!isCompleted) {
-                handlePlayPause(call.src, call.signal_id);
-              }
-            }}
-            className={`btn btn-outline-primary me-2 ${
-              isCompleted ? "disabled btn-outline-secondary" : ""
-            }`}
-            disabled={isCompleted} // Disable when completed
-          >
-            <FontAwesomeIcon
-              icon={isPlayingCurrent ? faPause : faPlay}
-            />
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-})}
-
-
+                        return (
+                          <tr
+                            key={call.id}
+                            style={{
+                              backgroundColor: isCompleted ? "#055160" : "",
+                              color: isCompleted ? "#ffffff" : "", // Set text color to white for contrast
+                            }}
+                          >
+                            <td>{index + 1}</td>
+                            <td>{call.eventType}</td>
+                            <td>{call.eventSubtype}</td>
+                            <td>{call.callDuration}</td>
+                            <td>
+                              <span
+                                className={
+                                  isPending
+                                    ? "text-danger font-weight-bold"
+                                    : isCompleted
+                                    ? "text-success font-weight-bold" // Ensure .text-success applies green color
+                                    : ""
+                                }
+                              >
+                                {call.reviewStatus}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="d-flex align-items-center">
+                                <button
+                                  className="btn btn-outline-info me-2"
+                                  onClick={() => handleInfoClick(call)}
+                                  disabled={isCompleted} // Disable when completed
+                                >
+                                  <FontAwesomeIcon icon={faInfoCircle} />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (!isCompleted) {
+                                      handlePlayPause(call.src, call.signal_id);
+                                    }
+                                  }}
+                                  className={`btn btn-outline-primary me-2 ${
+                                    isCompleted
+                                      ? "disabled btn-outline-secondary"
+                                      : ""
+                                  }`}
+                                  disabled={isCompleted} // Disable when completed
+                                >
+                                  <FontAwesomeIcon
+                                    icon={isPlayingCurrent ? faPause : faPlay}
+                                  />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
 
@@ -455,27 +470,27 @@ export default function Callsdata() {
 
               <div className="col-lg-6 ">
                 <div className="row">
-                <div className="white_card mb-20">
-                  <div className="mr-3 text-lg-right">
-                    Timer: {formatTime(timer)} {/* Display the running timer */}
-                  </div>
-                  <div className="audio-player-section p-20">
-                    <AudioPlayer
-                      src={currentAudio}
-                      autoPlay={isPlaying}
-                      onPlay={() => setIsPlaying(true)}
-                      onPause={() => setIsPlaying(false)}
-                    />
-                  </div>
-                  </div>
-                  </div>
-                  <div className="row mt-4">
                   <div className="white_card mb-20">
-
-                  <div className="wrapper ml-3 white_card mb-20 mt-3">
-                    <div className="card-body">
-                      <h3>Questionnaire</h3>
-                      {/* <div className="form-group-row">
+                    <div className="mr-3 text-lg-right">
+                      Timer: {formatTime(timer)}{" "}
+                      {/* Display the running timer */}
+                    </div>
+                    <div className="audio-player-section p-20">
+                      <AudioPlayer
+                        src={currentAudio}
+                        autoPlay={isPlaying}
+                        onPlay={() => setIsPlaying(true)}
+                        onPause={() => setIsPlaying(false)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="row mt-4">
+                  <div className="white_card mb-20">
+                    <div className="wrapper ml-3 white_card mb-20 mt-3">
+                      <div className="card-body">
+                        <h3>Questionnaire</h3>
+                        {/* <div className="form-group-row">
                           <label className="col-12" htmlFor="signalInformation">
                             Signal Information
                           </label>
@@ -488,284 +503,324 @@ export default function Callsdata() {
                           ></textarea>
                         </div> */}
 
-                      <div className="container">
-                        <div className="row mb-3">
-                          <div className="col-6">
-                            <label className="form-label" htmlFor="sopScore">
-                              1) Compliance of SOP
-                            </label>
+                        <div className="container">
+                          <div className="row mb-3">
+                            <div className="col-6">
+                              <label className="form-label" htmlFor="sopScore">
+                                1) Compliance of SOP
+                              </label>
+                            </div>
+                            <div className="col-6">
+                              <div>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.sopScore === "1" ? "btn-danger" : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick("sopScore", "1")
+                                  }
+                                >
+                                  Poor
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.sopScore === "2"
+                                      ? "btn-warning"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick("sopScore", "2")
+                                  }
+                                >
+                                  Good
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.sopScore === "3"
+                                      ? "btn-primary"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick("sopScore", "3")
+                                  }
+                                >
+                                  Excellent
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                          <div className="col-6">
-                            <div>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.sopScore === "1" ? "btn-danger" : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("sopScore", "1")
-                                }
+
+                          <div className="row mb-3">
+                            <div className="col-6">
+                              <label
+                                className="form-label"
+                                htmlFor="activeListeningScore"
                               >
-                                Poor
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.sopScore === "2" ? "btn-warning" : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("sopScore", "2")
-                                }
+                                2) Active Listening & Proper response
+                              </label>
+                            </div>
+                            <div className="col-6">
+                              <div>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.activeListeningScore === "1"
+                                      ? "btn-danger"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "activeListeningScore",
+                                      "1"
+                                    )
+                                  }
+                                >
+                                  Poor
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.activeListeningScore === "2"
+                                      ? "btn-warning"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "activeListeningScore",
+                                      "2"
+                                    )
+                                  }
+                                >
+                                  Good
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.activeListeningScore === "3"
+                                      ? "btn-primary"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "activeListeningScore",
+                                      "3"
+                                    )
+                                  }
+                                >
+                                  Excellent
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="row mb-3">
+                            <div className="col-6">
+                              <label
+                                className="form-label"
+                                htmlFor="releventDetailScore"
                               >
-                                Good
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.sopScore === "3" ? "btn-primary" : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("sopScore", "3")
-                                }
+                                3) Correct And Relevant Details Capturing
+                              </label>
+                            </div>
+                            <div className="col-6">
+                              <div>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.releventDetailScore === "1"
+                                      ? "btn-danger"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "releventDetailScore",
+                                      "1"
+                                    )
+                                  }
+                                >
+                                  Poor
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.releventDetailScore === "2"
+                                      ? "btn-warning"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "releventDetailScore",
+                                      "2"
+                                    )
+                                  }
+                                >
+                                  Good
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.releventDetailScore === "3"
+                                      ? "btn-primary"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "releventDetailScore",
+                                      "3"
+                                    )
+                                  }
+                                >
+                                  Excellent
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="row mb-3">
+                            <div className="col-6">
+                              <label
+                                className="form-label"
+                                htmlFor="releventDetailScore"
                               >
-                                Excellent
-                              </button>
+                                4) Correct Address Tagging
+                              </label>
+                            </div>
+                            <div className="col-6">
+                              <div>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.addressTaggingScore === "1"
+                                      ? "btn-danger"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "addressTaggingScore",
+                                      "1"
+                                    )
+                                  }
+                                >
+                                  Poor
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.addressTaggingScore === "2"
+                                      ? "btn-warning"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "addressTaggingScore",
+                                      "2"
+                                    )
+                                  }
+                                >
+                                  Good
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.addressTaggingScore === "3"
+                                      ? "btn-primary"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "addressTaggingScore",
+                                      "3"
+                                    )
+                                  }
+                                >
+                                  Excellent
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="row mb-3">
+                            <div className="col-6">
+                              <label
+                                className="form-label"
+                                htmlFor="callHandledTimeScore"
+                              >
+                                5) Call Handled Time
+                              </label>
+                            </div>
+                            <div className="col-6">
+                              <div>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.callHandledTimeScore === "1"
+                                      ? "btn-danger"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "callHandledTimeScore",
+                                      "1"
+                                    )
+                                  }
+                                >
+                                  Poor
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.callHandledTimeScore === "2"
+                                      ? "btn-warning"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "callHandledTimeScore",
+                                      "2"
+                                    )
+                                  }
+                                >
+                                  Good
+                                </button>
+                                <button
+                                  className={`btn me-2 ${
+                                    answers.callHandledTimeScore === "3"
+                                      ? "btn-primary"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleButtonClick(
+                                      "callHandledTimeScore",
+                                      "3"
+                                    )
+                                  }
+                                >
+                                  Excellent
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="row mb-3">
-                          <div className="col-6">
-                            <label
-                              className="form-label"
-                              htmlFor="activeListeningScore"
-                            >
-                              2) Active Listening & Proper response
-                            </label>
-                          </div>
-                          <div className="col-6">
-                            <div>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.activeListeningScore === "1"
-                                    ? "btn-danger"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("activeListeningScore", "1")
-                                }
-                              >
-                                Poor
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.activeListeningScore === "2"
-                                    ? "btn-warning"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("activeListeningScore", "2")
-                                }
-                              >
-                                Good
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.activeListeningScore === "3"
-                                    ? "btn-primary"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("activeListeningScore", "3")
-                                }
-                              >
-                                Excellent
-                              </button>
-                            </div>
-                          </div>
+                        <div className="form-group-row">
+                          <label className="col-6" htmlFor="remark">
+                            Remark (Optional)
+                          </label>
+                          <textarea
+                            className="form-control"
+                            id="remark"
+                            rows="3"
+                            value={answers.scoRemarks}
+                            onChange={(e) =>
+                              setAnswers((prevAnswers) => ({
+                                ...prevAnswers,
+                                scoRemarks: e.target.value,
+                              }))
+                            }
+                          ></textarea>
                         </div>
-
-                        <div className="row mb-3">
-                          <div className="col-6">
-                            <label
-                              className="form-label"
-                              htmlFor="releventDetailScore"
-                            >
-                              3) Correct And Relevant Details Capturing
-                            </label>
-                          </div>
-                          <div className="col-6">
-                            <div>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.releventDetailScore === "1"
-                                    ? "btn-danger"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("releventDetailScore", "1")
-                                }
-                              >
-                                Poor
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.releventDetailScore === "2"
-                                    ? "btn-warning"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("releventDetailScore", "2")
-                                }
-                              >
-                                Good
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.releventDetailScore === "3"
-                                    ? "btn-primary"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("releventDetailScore", "3")
-                                }
-                              >
-                                Excellent
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="row mb-3">
-                          <div className="col-6">
-                            <label
-                              className="form-label"
-                              htmlFor="releventDetailScore"
-                            >
-                              4) Correct Address Tagging
-                            </label>
-                          </div>
-                          <div className="col-6">
-                            <div>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.addressTaggingScore === "1"
-                                    ? "btn-danger"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("addressTaggingScore", "1")
-                                }
-                              >
-                                Poor
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.addressTaggingScore === "2"
-                                    ? "btn-warning"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("addressTaggingScore", "2")
-                                }
-                              >
-                                Good
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.addressTaggingScore === "3"
-                                    ? "btn-primary"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("addressTaggingScore", "3")
-                                }
-                              >
-                                Excellent
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="row mb-3">
-                          <div className="col-6">
-                            <label
-                              className="form-label"
-                              htmlFor="callHandledTimeScore"
-                            >
-                              5) Call Handled Time
-                            </label>
-                          </div>
-                          <div className="col-6">
-                            <div>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.callHandledTimeScore === "1"
-                                    ? "btn-danger"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("callHandledTimeScore", "1")
-                                }
-                              >
-                                Poor
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.callHandledTimeScore === "2"
-                                    ? "btn-warning"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("callHandledTimeScore", "2")
-                                }
-                              >
-                                Good
-                              </button>
-                              <button
-                                className={`btn me-2 ${
-                                  answers.callHandledTimeScore === "3"
-                                    ? "btn-primary"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleButtonClick("callHandledTimeScore", "3")
-                                }
-                              >
-                                Excellent
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                        <button
+                          className="btn btn-primary mt-3 mb-2"
+                          onClick={handleSubmit}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Submitting..." : "Submit"}{" "}
+                          {/* Show loading indicator */}
+                        </button>
                       </div>
-
-                      <div className="form-group-row">
-                        <label className="col-6" htmlFor="remark">
-                          Remark (Optional)
-                        </label>
-                        <textarea
-                          className="form-control"
-                          id="remark"
-                          rows="3"
-                          value={answers.scoRemarks}
-                          onChange={(e) =>
-                            setAnswers((prevAnswers) => ({
-                              ...prevAnswers,
-                              scoRemarks: e.target.value,
-                            }))
-                          }
-                        ></textarea>
-                      </div>
-                      <button
-                        className="btn btn-primary mt-3 mb-2"
-                        onClick={handleSubmit}
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Submitting..." : "Submit"}{" "}
-                        {/* Show loading indicator */}
-                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
             </div>
           </div>
         </div>

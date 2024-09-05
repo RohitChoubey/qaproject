@@ -4,7 +4,7 @@ import "jspdf-autotable";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 
-const BASE_URL = "api/users";
+const BASE_URL = "";
 
 
 // Generic function to transform data
@@ -39,9 +39,19 @@ const transformData = (data, columns) => {
 export const exportToExcel = async (dataUrl, columns, filename = 'data.xlsx') => {
   try {
     const response = await axios.get(`${BASE_URL}${dataUrl}`);
-    const transformedData = transformData(response.data, columns);
+    const data = response.data;
 
-    const worksheet = XLSX.utils.json_to_sheet(transformedData, { header: columns.map(col => col.dataField) });
+    // Add Sr. No to each row
+    const transformedData = data.map((row, index) => ({
+      srNo: index + 1, // Add Sr. No starting from 1
+      ...row
+    }));
+
+    const columnHeaders = [{ dataField: 'srNo', text: 'Sr. No' }, ...columns];
+
+    const worksheet = XLSX.utils.json_to_sheet(transformedData, {
+      header: columnHeaders.map(col => col.dataField)
+    });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
@@ -64,22 +74,86 @@ export const exportToExcel = async (dataUrl, columns, filename = 'data.xlsx') =>
     document.body.removeChild(link);
   } catch (error) {
     Swal.fire({
-        icon: "error",
-        title: "Not Exporting",
-        text: "Error exporting Excel. Please try again."
+      icon: "error",
+      title: "Export Error",
+      text: "Error exporting Excel. Please try again."
     });
   }
 };
 
+
+// export const exportToExcel = async (dataUrl, columns, filename = 'data.xlsx') => {
+//   try {
+//     const response = await axios.get(`${BASE_URL}${dataUrl}`);
+//     const transformedData = transformData(response.data, columns);
+
+//     const worksheet = XLSX.utils.json_to_sheet(transformedData, { header: columns.map(col => col.dataField) });
+//     const workbook = XLSX.utils.book_new();
+//     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+//     // Generate Excel file and create a Blob
+//     const excelBlob = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+//     const blob = new Blob([excelBlob], { type: "application/octet-stream" });
+
+//     // Create a link element
+//     const link = document.createElement("a");
+//     link.href = URL.createObjectURL(blob);
+//     link.download = filename;
+
+//     // Append the link element to the DOM
+//     document.body.appendChild(link);
+
+//     // Programmatically click the link to trigger the download
+//     link.click();
+
+//     // Clean up and remove the link element
+//     document.body.removeChild(link);
+//   } catch (error) {
+//     Swal.fire({
+//         icon: "error",
+//         title: "Not Exporting",
+//         text: "Error exporting Excel. Please try again."
+//     });
+//   }
+// };
+
+// export const exportToPDF = async (dataUrl, columns, filename = 'data.pdf') => {
+//   try {
+//     const response = await axios.get(`${BASE_URL}${dataUrl}`);
+//     const transformedData = transformData(response.data, columns);
+//     const doc = new jsPDF();
+  
+//     // Prepare table data and headers
+//     const columnHeaders = columns.map(col => col.text);
+//     const tableData = transformedData.map(row => columns.map(col => row[col.dataField]));
+
+//     // Add autoTable with headers and data
+//     doc.autoTable({
+//       head: [columnHeaders],
+//       body: tableData,
+//     });
+
+//     doc.save(filename);
+//   } catch (error) {
+    
+//   }
+// };
+
 export const exportToPDF = async (dataUrl, columns, filename = 'data.pdf') => {
   try {
     const response = await axios.get(`${BASE_URL}${dataUrl}`);
-    const transformedData = transformData(response.data, columns);
+    const data = response.data;
+
+    // Add Sr. No to each row
+    const transformedData = data.map((row, index) => ({
+      srNo: index + 1, // Add Sr. No starting from 1
+      ...row
+    }));
+
+    const columnHeaders = ['Sr. No', ...columns.map(col => col.text)];
+    const tableData = transformedData.map(row => [row.srNo, ...columns.map(col => row[col.dataField])]);
+
     const doc = new jsPDF();
-  
-    // Prepare table data and headers
-    const columnHeaders = columns.map(col => col.text);
-    const tableData = transformedData.map(row => columns.map(col => row[col.dataField]));
 
     // Add autoTable with headers and data
     doc.autoTable({
@@ -89,9 +163,14 @@ export const exportToPDF = async (dataUrl, columns, filename = 'data.pdf') => {
 
     doc.save(filename);
   } catch (error) {
-    
+    Swal.fire({
+      icon: "error",
+      title: "Export Error",
+      text: "Error exporting PDF. Please try again."
+    });
   }
 };
+
 
 export const goBack = () => {
   window.history.back();
@@ -100,17 +179,23 @@ export const goBack = () => {
 // Generic function to fetch data using GET
 export const getData = async (url) => {
   try {
-    const response = await axios.get(`${BASE_URL}${url}`);
+    console.log('Request URL:', url); // Log URL to verify it
+    const response = await axios.get(url);
     return response.data;
   } catch (error) {
+    console.error('Error Details:', error.response ? error.response.data : error.message);
+    alert(error.message); // Display a generic error message
+
     Swal.fire({
       icon: "error",
       title: "Error Fetching Data",
-      text: error.response ? error.response.data.message : "An error occurred while fetching data."
+      text: error.response ? error.response.data.message : 'An error occurred while fetching data.'
     });
+
     throw error; // Rethrow the error to handle it further up if needed
   }
 };
+
 
 // Generic function to post data
 export const postData = async (url, data) => {

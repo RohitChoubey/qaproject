@@ -121,7 +121,14 @@ const Login = ({ onLogin }) => {
         localStorage.setItem("role", "admin");
         onLogin(); // Call the login function passed from App component
         navigate("/dashboard");
-      } else {
+      }
+      else if (username ==="SCO" && password === "SCO1") {
+        localStorage.setItem("username", username);
+        localStorage.setItem("role", "SCO");
+        onLogin(); // Call the login function passed from App component
+        navigate("/dashboard");
+      }
+      else {
         setErrorMessage("Invalid user credentials.");
       }
       setErrorMessage("");

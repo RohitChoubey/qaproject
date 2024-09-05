@@ -19,7 +19,7 @@ const Dashboard = () => {
   const [totals, setTotals] = useState({ total: 0, completed: 0, pending: 0 });
 
   useEffect(() => {
-    fetch("/api/users/call-summary")
+    fetch("http://10.26.0.19/qaAPI/api/users/call-summary")
       .then((response) => response.json())
       .then((data) => {
         const formattedData = data.map((item) => ({
