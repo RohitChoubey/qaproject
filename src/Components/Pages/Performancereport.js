@@ -16,6 +16,7 @@ import {
   fetchPerformanceData,
 } from "../../utils/exportUtils";
 
+
 export default function PerformanceReport() {
   const navigate = useNavigate();
   const [tableData, setTableData] = useState([]);
@@ -26,7 +27,9 @@ export default function PerformanceReport() {
   const [selectedShift, setSelectedShift] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  
   const tableRef = useRef();
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const [noDataMessage, setNoDataMessage] = useState("");
@@ -168,9 +171,11 @@ export default function PerformanceReport() {
 
     if (isInitialLoad.current) {
       const today = new Date();
+      const currentDate = today.toISOString().split('T')[0];
       const lastMonthDate = new Date(today.setMonth(today.getMonth() - 1));
       const startDate = fromDate || lastMonthDate.toISOString().split("T")[0];
       setFromDate(startDate);
+      setToDate(currentDate);
       fetchData(currentPage, reportType, startDate, toDate, selectedShift);
       isInitialLoad.current = false; // Mark as loaded after fetching
     }
@@ -214,13 +219,6 @@ export default function PerformanceReport() {
     fetchData(1, reportType, fromDate, toDate, selectedShift); // Call fetchData with current parameters
   };
 
-  // Modify handleSearch to include the search query
-  // const handleSearchQuery = () => {
-  //   setCurrentPage(1); // Reset to first page
-  //   fetchData(1, reportType, fromDate, toDate, selectedShift, searchQuery);
-  // };
-
-  // Filtering data based on search query
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -239,6 +237,9 @@ export default function PerformanceReport() {
     }
   }, [searchQuery, tableData]);
 
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(parseInt(event.target.value, 10));
+  };
   return (
     <div>
       <div className="main_content_iner overly_inner mt-5">
@@ -287,7 +288,7 @@ export default function PerformanceReport() {
                 </Form.Control>
               </Form.Group>
             </div>
-            <div className="col-lg-2 col-md-6 col-sm-6">
+            <div className="col-lg-1 col-md-6 col-sm-6">
               <Form.Group controlId="fromDateSelect">
                 <Form.Label>From Date</Form.Label>
                 <Form.Control
@@ -298,7 +299,7 @@ export default function PerformanceReport() {
               </Form.Group>
             </div>
 
-            <div className="col-lg-2 col-md-6 col-sm-6">
+            <div className="col-lg-1 col-md-6 col-sm-6">
               <Form.Group controlId="toDateSelect">
                 <Form.Label>To Date</Form.Label>
                 <Form.Control
@@ -327,6 +328,17 @@ export default function PerformanceReport() {
                 </Form.Control>
               </Form.Group>
             </div>
+            <div className="col-lg-2 col-md-5 col-sm-6">
+      <Form.Group controlId="itemsPerPageSelect">
+        <Form.Label>Items Per Page</Form.Label>
+        <Form.Control as="select" value={itemsPerPage} onChange={handleItemsPerPageChange}>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+        </Form.Control>
+      </Form.Group>
+    </div>
             <div className="col-lg-1 col-md-6 col-sm-6">
               <Button
                 variant="primary mt-4"

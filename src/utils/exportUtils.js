@@ -4,7 +4,7 @@ import "jspdf-autotable";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 
-const BASE_URL = "";
+const BASE_URL = "http://10.26.0.19/qaAPI/api/users";
 
 
 // Generic function to transform data
@@ -144,9 +144,8 @@ export const exportToPDF = async (dataUrl, columns, filename = 'data.pdf') => {
     const response = await axios.get(`${BASE_URL}${dataUrl}`);
     const data = response.data;
 
-    // Add Sr. No to each row
     const transformedData = data.map((row, index) => ({
-      srNo: index + 1, // Add Sr. No starting from 1
+      srNo: index + 1,
       ...row
     }));
 
@@ -155,20 +154,56 @@ export const exportToPDF = async (dataUrl, columns, filename = 'data.pdf') => {
 
     const doc = new jsPDF();
 
+    // Load images directly (assuming they are in the assets folder)
+    const leftLogo = await loadImage('../assets/img/hr_police2.png');
+    const rightLogo = await loadImage('../assets/img/112_hr_logo.png');
+
+    // Add left logo
+    doc.addImage(leftLogo, 'PNG', 10, 10, 40, 40);
+    // Add right logo
+    doc.addImage(rightLogo, 'PNG', 160, 10, 40, 40);
+
+    const topMargin = 30;
+
+    doc.setFontSize(16);
+    doc.text('Quality Assurance Management System', doc.internal.pageSize.getWidth() / 2, topMargin, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text('Performance Report From 2024-08-04 to 2024-09-05', doc.internal.pageSize.getWidth() / 2, topMargin + 10, { align: 'center' });
+    doc.text('Emergency Response Centre (ERSS)', doc.internal.pageSize.getWidth() / 2, topMargin + 20, { align: 'center' });
+    doc.text('Sector 3, Panchkula, Haryana 134112', doc.internal.pageSize.getWidth() / 2, topMargin + 30, { align: 'center' });
+
+    // Draw a line below the last text
+    const lineY = topMargin + 40; 
+    doc.setLineWidth(0.5);
+    doc.line(10, lineY, doc.internal.pageSize.getWidth() - 10, lineY);
+
     // Add autoTable with headers and data
     doc.autoTable({
       head: [columnHeaders],
       body: tableData,
+      startY: 90, // Start table below the title
     });
 
+    // Save the PDF
     doc.save(filename);
   } catch (error) {
+    console.error("Export Error:", error);
     Swal.fire({
       icon: "error",
       title: "Export Error",
       text: "Error exporting PDF. Please try again."
     });
   }
+};
+
+// Helper function to load images
+const loadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => resolve(img);
+    img.onerror = (err) => reject(err);
+  });
 };
 
 
@@ -179,23 +214,17 @@ export const goBack = () => {
 // Generic function to fetch data using GET
 export const getData = async (url) => {
   try {
-    console.log('Request URL:', url); // Log URL to verify it
-    const response = await axios.get(url);
+    const response = await axios.get(`${BASE_URL}${url}`);
     return response.data;
   } catch (error) {
-    console.error('Error Details:', error.response ? error.response.data : error.message);
-    alert(error.message); // Display a generic error message
-
     Swal.fire({
       icon: "error",
       title: "Error Fetching Data",
-      text: error.response ? error.response.data.message : 'An error occurred while fetching data.'
+      text: error.response ? error.response.data.message : "An error occurred while fetching data."
     });
-
     throw error; // Rethrow the error to handle it further up if needed
   }
 };
-
 
 // Generic function to post data
 export const postData = async (url, data) => {
@@ -243,5 +272,33 @@ export const fetchPerformanceData = async (page, reportType, fromDate, toDate, s
   } catch (error) {
     console.error("Error fetching performance data:", error);
     throw error; // Rethrow error to handle it in fetchData
+  }
+};
+
+
+// Fetch Call Summary
+export const fetchData = async (url) => {
+  try {
+    const response = await fetch(`${BASE_URL}${url}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data from ${url}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
+
+// New function for fetching call data based on parameters
+export const fetchCallData = async (signalType, currentPage, itemsPerPage) => {
+  const url = `http://10.26.0.19/qaAPI/api/users/call-data?page=${currentPage}&limit=${itemsPerPage}&signalType=${signalType}`;
+  try {
+    const response = await axios.get(url);
+    return response.data; // Assuming the response structure matches your needs
+  } catch (error) {
+    console.error("Error fetching call data:", error);
+    throw error;
   }
 };

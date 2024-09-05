@@ -10,10 +10,11 @@ import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css"; // Ensure this CSS is imported
 import Swal from "sweetalert2";
 import {
-  getData,
+  fetchCallData,
   formatDurationMinutesSeconds,
   postData,
 } from "../../utils/exportUtils";
+import withReactContent from "sweetalert2-react-content";
 
 export default function Callsdata() {
   const [tableData, setTableData] = useState([]);
@@ -22,10 +23,11 @@ export default function Callsdata() {
   const [paginatedData, setPaginatedData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [signalId, setSignalId] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // State for submit button
-  const [fetchKey, setFetchKey] = useState(0); // Key to trigger fetch
-  const [timer, setTimer] = useState(0); // Timer in seconds
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fetchKey, setFetchKey] = useState(0);
+  const [timer, setTimer] = useState(0);
   const [scoQaTime, setScoQaTime] = useState(null);
+  const [socket, setSocket] = useState(null); // State for WebSocket
   const timerRef = React.useRef(null);
 
   const itemsPerPage = 10;
@@ -33,7 +35,8 @@ export default function Callsdata() {
   const signal_type = query.get("signal_type");
   const callType = query.get("type");
 
-  const AUDIO_BASE_URL = 'http://10.26.0.8:8080/ACDSAdmin-1.2/AudioDownloadServlet?absoluteFileName=';
+  const AUDIO_BASE_URL =
+    "http://10.26.0.8:8080/ACDSAdmin-1.2/AudioDownloadServlet?absoluteFileName=";
   const role = localStorage.getItem("role");
 
   // Initial form field values
@@ -48,42 +51,71 @@ export default function Callsdata() {
     scoRemarks: "",
   };
 
-  // Fetch data whenever `currentPage`, `signal_type`, or `fetchKey` changes
+  //websocket connection
+  useEffect(() => {
+    // Set up WebSocket connection
+    const webSocket = new WebSocket("ws://your-websocket-url"); // Replace with your WebSocket URL
+    setSocket(webSocket);
+
+    webSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "event_processing") {
+        // Update the UI for the processing event
+        setTableData((prevData) =>
+          prevData.map((item) =>
+            item.eventId === data.eventId
+              ? { ...item, processing: true } // Mark event as processing
+              : item
+          )
+        );
+      }
+    };
+
+    return () => {
+      webSocket.close(); // Clean up on unmount
+    };
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       console.log("Fetching data...");
 
       try {
-        // Use the getData function to fetch the data
-        const response = await getData(
-          `/qaAPI/api/user/call-data?page=${currentPage}&limit=${itemsPerPage}&signalType=${signal_type}`
-        );
+        const response = await fetchCallData(signal_type);
         if (response && Array.isArray(response)) {
-          const transformedData = response.map((item) => ({
-    id: item.id,
-    eventId: item.event_id,
-    eventType: item.event_maintype,
-    eventSubtype: item.event_subtype,
-    reviewStatus: item.review_status,
-    src1: item.voice_path,
-    src: `${AUDIO_BASE_URL}${item.voice_path}`, // Corrected line
-    callDuration: formatDurationMinutesSeconds(
-        item.call_duration_millis
-    ),
-    signal_id: item.signal_id,
-    call_pick_duration_millis: item.call_pick_duration_millis,
-    event_registration_time: item.event_registration_time,
-    priority: item.priority,
-    district_code: item.district_code,
-    victim_name: item.victim_name,
-    victim_age: item.victim_age,
-    victim_gender: item.victim_gender,
-    victim_address: item.victim_address,
-    addl_info: item.addl_info,
-    near_ps: item.near_ps,
-}));
-
-
+          const transformedData = response
+            .filter((item) => item.event_maintype !== "NULL") // Filter out rows where event_maintype is "NULL"
+            .map((item) => {
+              const transformedItem = {
+                id: item.id,
+                eventId: item.event_id,
+                reviewStatus: item.review_status,
+                src1: item.voice_path,
+                src: `${AUDIO_BASE_URL}${item.voice_path}`, // Corrected line
+                callDuration: formatDurationMinutesSeconds(
+                  item.call_duration_millis
+                ),
+                signal_id: item.signal_id,
+                call_pick_duration_millis: item.call_pick_duration_millis,
+                event_registration_time: item.event_registration_time,
+                priority: item.priority,
+                district_code: item.district_code,
+                victim_name: item.victim_name,
+                victim_age: item.victim_age,
+                victim_gender: item.victim_gender,
+                victim_address: item.victim_address,
+                addl_info: item.addl_info,
+                near_ps: item.near_ps,
+                processing: false, // Initialize processing state
+              };
+    
+              if (item.event_maintype !== "NULL") {
+                transformedItem.eventType = item.event_maintype;
+              }
+              transformedItem.eventSubtype = item.event_subtype;
+              return transformedItem;
+            });
+    
           setTableData(transformedData);
         } else {
           console.error("Unexpected response format:", response);
@@ -91,10 +123,13 @@ export default function Callsdata() {
       } catch (error) {
         console.error("Error fetching data:", error);
       }
+    
+    
+    fetchData();
     };
 
     fetchData();
-  }, [currentPage, signal_type, fetchKey]); // Include `fetchKey` to trigger fetch
+  }, [currentPage, signal_type, fetchKey]);
 
   // Pagination: Update the paginated data based on current page
   useEffect(() => {
@@ -105,9 +140,15 @@ export default function Callsdata() {
 
   // Timer: Check if the timer exceeds 15 minutes (900 seconds) and alert if it does
   useEffect(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    setPaginatedData(tableData.slice(indexOfFirstItem, indexOfLastItem));
+  }, [currentPage, tableData]);
+
+  useEffect(() => {
     if (timer >= 900) {
       alert("Time limit exceeded! Please submit the form.");
-      clearInterval(timerRef.current); // Stop the timer if limit exceeded
+      clearInterval(timerRef.current);
     }
   }, [timer]);
 
@@ -192,15 +233,12 @@ export default function Callsdata() {
 
   // Handle form submission
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
-    clearInterval(timerRef.current); // Stop the timer
-    setScoQaTime(timer); // Save the final time to scoQaTime
-
-    // Reset the timer to 0
+    event.preventDefault();
+    clearInterval(timerRef.current);
+    setScoQaTime(timer);
     setTimer(0);
-    timerRef.current = null; // Clear the timer reference
+    timerRef.current = null;
 
-    // Check for missing required fields
     const requiredFields = [
       "sopScore",
       "activeListeningScore",
@@ -210,7 +248,6 @@ export default function Callsdata() {
     ];
     const missingFields = requiredFields.filter((field) => !answers[field]);
 
-    // Validation checks
     if (signalId === null) {
       Swal.fire({
         icon: "error",
@@ -227,22 +264,28 @@ export default function Callsdata() {
       return;
     }
 
-    setIsSubmitting(true); // Indicate that form submission is in progress
+    setIsSubmitting(true);
     try {
-      // Use the postData utility function to post the data
+      // Notify other users about this event being processed
+      if (socket) {
+        socket.send(
+          JSON.stringify({ type: "event_processing", eventId: signalId })
+        );
+      }
+
       await postData("/create-coqa-data", {
         ...answers,
         scoQaTime: timer,
         signalId,
       });
-      setFetchKey((prevKey) => prevKey + 1); // Trigger a data refresh
-      setAnswers(initialAnswers); // Reset the form fields
-      setSignalId(null); // Clear signal ID if needed
-      Swal.fire({ icon: "success", title: "Submitted Successfully!" }); // Show success message
+      setFetchKey((prevKey) => prevKey + 1);
+      setAnswers(initialAnswers);
+      setSignalId(null);
+      Swal.fire({ icon: "success", title: "Submitted Successfully!" });
     } catch (error) {
-      console.error("Error submitting data:", error); // Handle submission error
+      console.error("Error submitting data:", error);
     } finally {
-      setIsSubmitting(false); // Reset submitting state
+      setIsSubmitting(false);
     }
   };
 
@@ -253,14 +296,18 @@ export default function Callsdata() {
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
 
+  const MySwal = withReactContent(Swal); // Wrap SweetAlert for React
+
   //Function to show the details of a call list
   const handleInfoClick = (call) => {
-    Swal.fire({
+    MySwal.fire({
       title: "Call Information",
       html: `
           <div class="swal-custom-container">
             <div class="swal-info">
-              <div class="info-row" style={{ display: role === "admin" ? "none" : "block" }}>>
+              <div class="info-row" style="display: ${
+                role === "admin" ? "none" : "block"
+              }">
                 <strong>Signal Information:</strong>
                 <span>${call.signal_id || "N/A"}</span>
               </div>
@@ -294,7 +341,6 @@ export default function Callsdata() {
                 ">
                   ${call.priority || "N/A"}
                 </span>
-
               </div>
               <div class="info-row">
                 <strong>District:</strong>
@@ -341,11 +387,46 @@ export default function Callsdata() {
         `,
       confirmButtonText: "Close",
       customClass: {
-        popup: "swal-custom-style", // Ensure the new custom style applies only to this popup
+        popup: "swal-custom-style", // Ensures that custom styling applies only to this popup
         container: "swal-custom-container",
         title: "swal-title",
         content: "swal-content",
         confirmButton: "swal-confirm-button",
+      },
+      position: "top-start", // Position on the left-hand side
+      allowOutsideClick: false, // Prevent the popup from closing on outside click
+      allowEscapeKey: false, // Disable closing with the ESC key
+      allowEnterKey: false, // Disable closing with the Enter key
+      backdrop: false, // Disable the backdrop so it doesn't close when clicking outside
+      didOpen: () => {
+        // Make the SweetAlert popup draggable
+        const draggableElement = Swal.getPopup();
+        draggableElement.setAttribute("draggable", "true");
+
+        draggableElement.addEventListener("dragstart", (event) => {
+          const style = window.getComputedStyle(event.target, null);
+          event.dataTransfer.setData(
+            "text/plain",
+            parseInt(style.getPropertyValue("left"), 10) -
+              event.clientX +
+              "," +
+              (parseInt(style.getPropertyValue("top"), 10) - event.clientY)
+          );
+        });
+
+        document.body.addEventListener("dragover", (event) => {
+          event.preventDefault();
+        });
+
+        document.body.addEventListener("drop", (event) => {
+          event.preventDefault();
+          const offset = event.dataTransfer.getData("text/plain").split(",");
+          const draggableElement = Swal.getPopup();
+          draggableElement.style.left =
+            event.clientX + parseInt(offset[0], 10) + "px";
+          draggableElement.style.top =
+            event.clientY + parseInt(offset[1], 10) + "px";
+        });
       },
     });
   };
@@ -412,6 +493,7 @@ export default function Callsdata() {
                             <td>{call.eventType}</td>
                             <td>{call.eventSubtype}</td>
                             <td>{call.callDuration}</td>
+                            <td>{}</td>
                             <td>
                               <span
                                 className={
@@ -422,7 +504,7 @@ export default function Callsdata() {
                                     : ""
                                 }
                               >
-                                {call.reviewStatus}
+                              {call.processing ? "Processing..." : call.reviewStatus  }
                               </span>
                             </td>
                             <td>

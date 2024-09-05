@@ -2,8 +2,7 @@
   "name": "qaproject",
   "version": "0.1.0",
   "private": true,
-  "proxy" : "http://10.26.0.19/qaAPI/",
-
+  "proxy": "http://10.26.0.19/qaAPI/",
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
@@ -35,8 +34,11 @@
     "react-table": "^7.8.0",
     "react-to-pdf": "^1.0.1",
     "react-to-print": "^2.15.1",
+    "socket.io-client": "^4.7.5",
     "sweetalert2": "^11.12.2",
+    "sweetalert2-react-content": "^5.0.7",
     "web-vitals": "^2.1.4",
+    "ws": "^8.18.0",
     "xlsx": "^0.18.5"
   },
   "scripts": {

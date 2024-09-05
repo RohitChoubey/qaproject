@@ -73,24 +73,39 @@ const Login = ({ onLogin }) => {
   });
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+  const socketRef = useRef(null); // Reference for the WebSocket
 
   useEffect(() => {
-    const fetchCredentials = async () => {
-      try {
-        const { data } = await axios.get(
-          "https://your-api-endpoint.com/credentials"
-        );
-        setFormData((prev) => ({
-          ...prev,
-          username: data.username,
-          password: data.password,
-        }));
-      } catch (error) {
-        console.error("Error fetching credentials:", error);
+    // Connect to WebSocket server on port 8080
+    socketRef.current = new WebSocket("ws://localhost:8080");
+
+    socketRef.current.onopen = () => {
+      console.log("WebSocket connection established"); // Log successful connection
+    };
+
+    socketRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'CONCURRENT_LOGIN') {
+        alert(data.message); // Notify the user about the concurrent login
+        handleLogout(); // Optionally log out the user
       }
     };
-    fetchCredentials();
+
+    socketRef.current.onerror = (error) => {
+      console.error("WebSocket error:", error); // Log any WebSocket errors
+    };
+
+    return () => {
+      socketRef.current.close(); // Clean up WebSocket on unmount
+    };
   }, []);
+
+  const handleLogout = () => {
+    // Logic for logging out the user
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    navigate("/login"); // Redirect to login page
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -116,19 +131,17 @@ const Login = ({ onLogin }) => {
     }
 
     try {
-      if (username === "rohit" && password === "Rohit@123") {
+      // Simulate login logic
+      if ((username === "rohit" && password === "Rohit@123") || (username === "SCO" && password === "SCO1")) {
         localStorage.setItem("username", username);
-        localStorage.setItem("role", "admin");
+        localStorage.setItem("role", username === "rohit" ? "admin" : "SCO");
         onLogin(); // Call the login function passed from App component
+
+        // Notify WebSocket server of login
+        socketRef.current.send(JSON.stringify({ type: 'LOGIN', username }));
+
         navigate("/dashboard");
-      }
-      else if (username ==="SCO" && password === "SCO1") {
-        localStorage.setItem("username", username);
-        localStorage.setItem("role", "SCO");
-        onLogin(); // Call the login function passed from App component
-        navigate("/dashboard");
-      }
-      else {
+      } else {
         setErrorMessage("Invalid user credentials.");
       }
       setErrorMessage("");
@@ -158,7 +171,7 @@ const Login = ({ onLogin }) => {
                   </h3>
                   <label
                     style={{
-                      color: "0#5d7c99",
+                      color: "#5d7c99",
                       fontSize: "20px",
                       fontWeight: "600",
                     }}
@@ -167,8 +180,7 @@ const Login = ({ onLogin }) => {
                   </label>
                 </div>
                 <form onSubmit={handleSubmit} autoComplete="off">
-                  <div className=" placeholder-container form-group first">
-                    {/* <label htmlFor="username">Username <span className="text-danger"> *</span></label> */}
+                  <div className="placeholder-container form-group first">
                     <input
                       type="text"
                       className="form-control"
@@ -181,7 +193,6 @@ const Login = ({ onLogin }) => {
                     <span className="required-asterisk">*</span>
                   </div>
                   <div className="placeholder-container form-group last mb-3">
-                    {/* <label htmlFor="password">Password<span className="text-danger"> *</span></label> */}
                     <input
                       type="password"
                       className="form-control"
@@ -193,7 +204,7 @@ const Login = ({ onLogin }) => {
                     />
                     <span className="required-asterisk">*</span>
                   </div>
-                  <div className="placeholder-container form-group capzxtcha-group">
+                  <div className="placeholder-container form-group captcha-group">
                     <div className="captcha-container">
                       <CaptchaImage captcha={captcha} className="w-25 ml-2" />
                       <span onClick={handleCaptchaRefresh}>
@@ -213,7 +224,7 @@ const Login = ({ onLogin }) => {
                       onChange={handleChange}
                       required
                     />
-                      <span className="required-asterisk">*</span>
+                    <span className="required-asterisk">*</span>
                   </div>
                   {errorMessage && (
                     <div className="error-message">{errorMessage}</div>
