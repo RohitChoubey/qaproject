@@ -55,7 +55,6 @@ const DetailedReport = () => {
     fetchData(currentPage, loginId, defaultFromDate, defaultToDate);
   }, [loginId, defaultFromDate, defaultToDate, currentPage]);
 
-  // Function to fetch data from API
   // Function to fetch data from the API
   const fetchData = async (page, loginId, fromDate, toDate, itemsPerPage) => {
     // Construct the API URL with query parameters

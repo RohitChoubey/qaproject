@@ -62,7 +62,6 @@ const AdminSetting = () => {
             : row
         )
       );
-
       Swal.fire("Updated Successfully!", `Percentage: ${percentage}, Max Limit: ${maxLimit}`, "success");
     } catch {
       Swal.fire("Update Failed", "There was an error updating the data. Please try again.", "error");

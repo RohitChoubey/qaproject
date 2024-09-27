@@ -32,7 +32,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             <span>Dashboard</span>
           </NavLink>
         </li>
-        <li style={{ display: role === "admin" ? "none" : "block" }}>
+        <li style={{ display: role === "SCO" ? "none" : "block" }}>
           <NavLink
             to="/performancereport"
             className={isPerformanceReportActive ? "mm-active active" : ""}
@@ -43,7 +43,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             <span>Performance Report</span>
           </NavLink>
         </li>
-        <li style={{ display: role === "admin" ? "none" : "block" }}>
+        <li style={{ display: role === "SCO" ? "none" : "block" }}>
           <NavLink
             to="/adminsetting"
             className={isAdminSettingActive ? "mm-active active" : ""}

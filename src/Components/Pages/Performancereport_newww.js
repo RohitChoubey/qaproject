@@ -475,3 +475,142 @@ export default function PerformanceReport() {
     
   );
 }
+// Define columns for "CO Performance"
+const columnsCO = [
+  { dataField: "srNo", text: "Sr. No", sort: true },
+  { dataField: "co_employee_code", text: "Employee Code", sort: true },
+  { dataField: "co_name", text: "CO Name", sort: true },  
+  { dataField: "total_calls", text: "Total Calls", sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+   },
+  { dataField: "average_call_duration_millis", text: "Average Call", sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+  },
+  { dataField: "sop_score", text: "Compliance of SOP", sort: true },
+  { dataField: "active_listening_score", text: "Active Listening & Proper Response", sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+   },
+  { dataField: "relevent_detail_score", text: "Correct and Relevant Details Capturing", sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+   },
+  { dataField: "address_tagging_score", text: "Correct Address Tagging", sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+   },
+  { dataField: "call_handled_time_score", text: "Call Handled Time", sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+   },
+  { dataField: "average_score", text: "Average Score", sort: true,
+
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+  },
+];
+
+const columnsSCO = [
+  { dataField: "srNo", text: "Sr. No", sort: true },
+  { dataField: "sco_employee_code", text: "Login ID", sort: true },
+  {
+    dataField: "total_calls",
+    text: "Completed QA",
+    sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+  },
+  {
+    dataField: "average_qa_time",
+    text: "Average QA Completion Time",
+    sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+  },
+  {
+    dataField: "pending_calls",
+    text: "Average Pending QA per Day",
+    sort: true,
+    headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+      <div style={{ display: "flex" }}>
+        {column.text}
+        {sortElement}
+        &ensp;
+        {<FontAwesomeIcon icon={faSortDown} />}
+      </div>
+    ),
+  },
+  {
+    dataField: "detailReport",
+    text: "Actions",
+    formatter: (cell, row) => (
+      <button
+        className="btn btn-outline-info"
+        data-toggle="tooltip"
+        data-placement="top"
+        title="Edit Call Details"
+        onClick={() =>
+          handleDetailClick(row.sco_employee_code, fromDate, toDate)
+        }
+      >
+        <FontAwesomeIcon icon={faEdit} />
+      </button>
+    ),
+  },
+];

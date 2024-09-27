@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://10.26.0.19/qaAPI/",
+  "homepage": "http://10.26.0.19/qa",
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
@@ -27,6 +28,7 @@
     "react-bootstrap": "^2.10.4",
     "react-bootstrap-table-next": "^4.0.3",
     "react-bootstrap-table2-paginator": "^2.1.2",
+    "react-data-table-component": "^7.6.2",
     "react-dom": "^18.3.1",
     "react-h5-audio-player": "^3.9.3",
     "react-router-dom": "^6.24.0",
@@ -35,6 +37,7 @@
     "react-to-pdf": "^1.0.1",
     "react-to-print": "^2.15.1",
     "socket.io-client": "^4.7.5",
+    "styled-components": "^6.1.13",
     "sweetalert2": "^11.12.2",
     "sweetalert2-react-content": "^5.0.7",
     "web-vitals": "^2.1.4",

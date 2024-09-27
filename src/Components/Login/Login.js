@@ -8,149 +8,165 @@ import { faSyncAlt } from "@fortawesome/free-solid-svg-icons";
 import CryptoJS from "crypto-js";
 import userLogo from "./assets/112_hr_logo.png";
 
+// Function to generate a random captcha
 const generateCaptcha = () => {
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; // Possible characters for captcha
+  // Create a 6-character random string
   return Array.from({ length: 6 }, () =>
     characters.charAt(Math.floor(Math.random() * characters.length))
   ).join("");
 };
 
+// Component to render the captcha image
 const CaptchaImage = ({ captcha }) => {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef(null); // Reference to the canvas element
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    const canvas = canvasRef.current; // Get the canvas reference
+    const ctx = canvas.getContext("2d"); // Get the 2D drawing context
 
-    // Clear the canvas
+    // Clear the canvas for redrawing
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw a professional sports-themed background pattern
+    // Draw a background pattern with circles
     const drawCircles = () => {
-      const numCircles = 30; // Increase the number of circles
-      const maxRadius = 10; // Smaller radius for the circles
+      const numCircles = 30; // Number of circles to draw
+      const maxRadius = 10; // Maximum radius for the circles
 
       for (let i = 0; i < numCircles; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const radius = Math.random() * maxRadius;
+        const x = Math.random() * canvas.width; // Random x position
+        const y = Math.random() * canvas.height; // Random y position
+        const radius = Math.random() * maxRadius; // Random radius
 
-        // Use a subtle color for the circles
-        const color = `rgba(0, 0, 0, 0.1)`; // Light grey for subtlety
+        // Set a light grey color for subtle circles
+        const color = `rgba(0, 0, 0, 0.1)`;
         ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
+        ctx.arc(x, y, radius, 0, Math.PI * 2); // Draw the circle
+        ctx.fillStyle = color; // Set fill color
+        ctx.fill(); // Fill the circle
       }
     };
 
-    drawCircles();
+    drawCircles(); // Call the function to draw circles
 
     // Draw the captcha text
-    ctx.font = "35px 'Arial', sans-serif"; // Use a normal font size and style
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "center";
+    ctx.font = "35px 'Arial', sans-serif"; // Set font style
+    ctx.textBaseline = "middle"; // Set text baseline
+    ctx.textAlign = "center"; // Center align the text
 
-    // Apply a text outline and shadow for better readability
+    // Draw the text outline and shadow for better visibility
     ctx.strokeStyle = "#000"; // Outline color
     ctx.lineWidth = 1; // Outline width
-    ctx.strokeText(captcha, canvas.width / 2, canvas.height / 2);
+    ctx.strokeText(captcha, canvas.width / 2, canvas.height / 2); // Draw outline
 
     ctx.fillStyle = "#000"; // Text color
-    ctx.fillText(captcha, canvas.width / 2, canvas.height / 2);
-  }, [captcha]);
+    ctx.fillText(captcha, canvas.width / 2, canvas.height / 2); // Draw filled text
+  }, [captcha]); // Redraw on captcha change
 
-  return <canvas ref={canvasRef} width="200" height="50"></canvas>;
+  return <canvas ref={canvasRef} width="200" height="50"></canvas>; // Render the canvas
 };
 
+// Login component to handle user login
 const Login = ({ onLogin }) => {
-  const [captcha, setCaptcha] = useState(generateCaptcha());
+  const [captcha, setCaptcha] = useState(generateCaptcha()); // State for captcha
   const [formData, setFormData] = useState({
     username: "",
     password: "",
     captchaInput: "",
-  });
-  const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate();
+  }); // State for form data
+  const [errorMessage, setErrorMessage] = useState(""); // State for error messages
+  const navigate = useNavigate(); // Hook for navigation
   const socketRef = useRef(null); // Reference for the WebSocket
 
   useEffect(() => {
-    // Connect to WebSocket server on port 8080
+    // Connect to the WebSocket server on port 8080
     socketRef.current = new WebSocket("ws://localhost:8080");
 
     socketRef.current.onopen = () => {
       console.log("WebSocket connection established"); // Log successful connection
     };
 
+    // Handle messages from the WebSocket server
     socketRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type === 'CONCURRENT_LOGIN') {
-        alert(data.message); // Notify the user about the concurrent login
-        handleLogout(); // Optionally log out the user
+      if (data.type === "CONCURRENT_LOGIN") {
+        alert(data.message); // Notify the user about concurrent login
+        handleLogout(); // Log out the user if needed
       }
     };
 
+    // Handle any WebSocket errors
     socketRef.current.onerror = (error) => {
-      console.error("WebSocket error:", error); // Log any WebSocket errors
+      console.error("WebSocket error:", error); // Log errors
     };
 
+    // Cleanup WebSocket connection on component unmount
     return () => {
-      socketRef.current.close(); // Clean up WebSocket on unmount
+      socketRef.current.close();
     };
-  }, []);
+  }, []); // Run once on mount
 
   const handleLogout = () => {
     // Logic for logging out the user
-    localStorage.removeItem("username");
-    localStorage.removeItem("role");
-    navigate("/login"); // Redirect to login page
+    localStorage.removeItem("username"); // Remove username from local storage
+    localStorage.removeItem("role"); // Remove role from local storage
+    navigate("/login"); // Redirect to the login page
   };
 
+  // Handle input changes in the form
   const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    const { id, value } = e.target; // Get input id and value
+    setFormData((prev) => ({ ...prev, [id]: value })); // Update form data state
   };
 
+  // Refresh the captcha by generating a new one
   const handleCaptchaRefresh = () => {
     setCaptcha(generateCaptcha());
   };
 
+  // Handle form submission
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    const { username, password, captchaInput } = formData;
+    event.preventDefault(); // Prevent default form submission behavior
+    const { username, password, captchaInput } = formData; // Destructure form data
 
+    // Validate input fields
     if (!username || !password) {
       return setErrorMessage("Please provide valid input");
     }
 
+    // Validate the captcha input
     if (captchaInput !== captcha) {
-      setErrorMessage("Invalid Captcha!");
-      handleCaptchaRefresh();
-      return setFormData((prev) => ({ ...prev, captchaInput: "" }));
+      setErrorMessage("Invalid Captcha!"); // Show error message
+      handleCaptchaRefresh(); // Refresh captcha
+      return setFormData((prev) => ({ ...prev, captchaInput: "" })); // Reset captcha input
     }
 
     try {
       // Simulate login logic
-      if ((username === "rohit" && password === "Rohit@123") || (username === "SCO" && password === "SCO1")) {
-        localStorage.setItem("username", username);
-        localStorage.setItem("role", username === "rohit" ? "admin" : "SCO");
-        onLogin(); // Call the login function passed from App component
+      if (
+        (username === "rohit" && password === "Rohit@123") ||
+        (username === "SCO" && password === "SCO1") ||
+        (username === "SCO2" && password === "SCO2") ||
+        (username === "SCO3" && password === "SCO3")
+      ) {
+        localStorage.setItem("username", username); // Store username in local storage
+        localStorage.setItem("role", username === "rohit" ? "admin" : "SCO"); // Store user role
+        onLogin(); // Call the login function passed from parent component
 
         // Notify WebSocket server of login
-        socketRef.current.send(JSON.stringify({ type: 'LOGIN', username }));
+        socketRef.current.send(JSON.stringify({ type: "LOGIN", username }));
 
-        navigate("/dashboard");
+        navigate("/dashboard"); // Redirect to dashboard
       } else {
-        setErrorMessage("Invalid user credentials.");
+        setErrorMessage("Invalid user credentials."); // Show error message for invalid login
       }
-      setErrorMessage("");
+      setErrorMessage(""); // Clear any error messages
     } catch (error) {
-      console.error("Login failed:", error);
-      setErrorMessage("Invalid user credentials.");
+      console.error("Login failed:", error); // Log error
+      setErrorMessage("Invalid user credentials."); // Show error message
     }
-    handleCaptchaRefresh();
-    setFormData((prev) => ({ ...prev, captchaInput: "" }));
+    handleCaptchaRefresh(); // Refresh captcha after submission
+    setFormData((prev) => ({ ...prev, captchaInput: "" })); // Clear captcha input
   };
 
   return (

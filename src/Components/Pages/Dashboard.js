@@ -1,251 +1,67 @@
-// import React, { useEffect, useState } from "react";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import { faPhoneAlt, faExclamationCircle, faWaveSquare, faPhoneSlash, faRoad, faComments, faEye, faCheckCircle, faHourglassHalf,faListAlt} from "@fortawesome/free-solid-svg-icons";
-// import { Link, NavLink } from "react-router-dom";
-// import {
-//   fetchData,
-// } from "../../utils/exportUtils";
-
-// const iconMap = {
-//   1: { icon: faPhoneAlt, color: "#007bff" },
-//   2: { icon: faExclamationCircle, color: "#dc3545" },
-//   3: { icon: faPhoneSlash, color: "#dc3545" },
-//   4: { icon: faWaveSquare, color: "#17a2b8" },
-//   5: { icon: faPhoneSlash, color: "#ffc107" },
-//   6: { icon: faRoad, color: "#28a745" },
-//   7: { icon: faComments, color: "#6610f2" },
-// };
-
-// const Dashboard = () => {
-//   const [callData, setCallData] = useState([]);
-//   const [totals, setTotals] = useState({ total: 0, completed: 0, pending: 0 });
-
-//   useEffect(() => {
-//     const fetchCallSummary = async () => {
-//       try {
-//         const data = await fetchData("/call-summary");
-//         const formattedData = data.map((item) => ({
-//           ...item,
-//           ...iconMap[item.signalTypeId], // Assuming iconMap is defined in the component
-//         }));
-
-//         // Calculate totals
-//         const total = formattedData.reduce((acc, item) => acc + (Number(item.totalCalls) || 0), 0);
-//         const completed = formattedData.reduce((acc, item) => acc + (Number(item.completedCalls) || 0), 0);
-//         const pending = formattedData.reduce((acc, item) => acc + (Number(item.pendingCalls) || 0), 0);
-
-//         setCallData(formattedData);
-//         setTotals({ total, completed, pending });
-//       } catch (error) {
-//         console.error("Error in fetching call summary:", error);
-//       }
-//     };
-
-//     fetchCallSummary();
-//   }, []);
-
-//   return (
-//     <div className="main_content_iner overly_inner mt-5">
-//       <div className="container-fluid p-0">
-//         <div className="row">
-//           <div className="col-12">
-//             <div className="page_title_box d-flex align-items-center justify-content-between">
-//               <div className="page_title_left">
-//                 <h3 className="f_s_30 f_w_700 text_white">Dashboard</h3>
-//                 <ol className="breadcrumb page_bradcam mb-0">
-//                   <li className="breadcrumb-item">
-//                     <Link to="#">Dashboard</Link>
-//                   </li>
-//                   <li className="breadcrumb-item active">Call Logs</li>
-//                 </ol>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//         <div className="row">
-//           <div className="main-content">
-//             <div className="overview-section">
-//               <div className="overview-card">
-//                 <h2>
-//                   <FontAwesomeIcon
-//                     icon={faListAlt}
-//                     style={{ color: "blue", marginRight: "10px" }}
-//                   />
-//                   <strong>Total Calls</strong>
-//                 </h2>
-//                 <div className="overview-number">{totals.total}</div>
-//               </div>
-//               <div className="overview-card">
-//                 <h2>
-//                   <FontAwesomeIcon
-//                     icon={faCheckCircle}
-//                     style={{ color: "rgb(40, 167, 69)", marginRight: "10px" }}
-//                   />
-//                   <strong>Completed Calls</strong>
-//                 </h2>
-//                 <div className="overview-number">{totals.completed}</div>
-//               </div>
-//               <div className="overview-card">
-//                 <h2>
-//                   <FontAwesomeIcon
-//                     icon={faHourglassHalf}
-//                     style={{ color: "orange", marginRight: "10px" }}
-//                   />
-//                   <strong>Pending Calls</strong>
-//                 </h2>
-//                 <div className="overview-number">{totals.pending}</div>
-//               </div>
-//             </div>
-//           </div>
-//           {callData.map((call, index) => (
-//             <div key={index} className="col-lg-6 col-md-6 col-sm-12 mb-4">
-//               <div className="white_card mb_20">
-//                 <div className="white_card_header">
-//                   <div className="box_header m-0">
-//                     <div className="main-title">
-//                       <h3 className="m-0">
-//                         <FontAwesomeIcon icon={call.icon} color={call.color} />{" "}
-//                         {call.signalType}
-//                       </h3>
-//                     </div>
-//                   </div>
-//                 </div>
-//                 <table className="table table-responsive-lg ml-4">
-//                   <thead>
-//                     <tr>
-//                       <th>Total Calls</th>
-//                       <th>Calls For QA</th>
-//                       <th>Pending</th>
-//                       <th>Call List</th>
-//                     </tr>
-//                   </thead>
-//                   <tbody>
-//                     <tr>
-//                       <td>{call.totalCalls}</td>
-//                       <td>{call.completedCalls}</td>
-//                       <td>{call.pendingCalls}</td>
-//                       <td>
-//                         <NavLink
-//                           to={`/calldata?signal_type=${
-//                             call.signalTypeId
-//                           }&type=${encodeURIComponent(call.signalType)}`}
-//                           data-toggle="tooltip"
-//                           title="View Call Details"
-//                         >
-//                           <button className="btn btn-default">
-//                             <FontAwesomeIcon icon={faEye} />
-//                           </button>
-//                         </NavLink>
-//                       </td>
-//                     </tr>
-//                   </tbody>
-//                 </table>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard;
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faPhoneAlt,
-  faExclamationCircle,
-  faWaveSquare,
-  faPhoneSlash,
-  faRoad,
-  faComments,
-  faEye,
-  faCheckCircle,
-  faHourglassHalf,
-  faListAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import {faPhoneAlt, faExclamationCircle, faWaveSquare, faPhoneSlash, faRoad, faComments, faEye, faCheckCircle, faHourglassHalf, faListAlt } from "@fortawesome/free-solid-svg-icons";
 import { Link, NavLink } from "react-router-dom";
 import { fetchData } from "../../utils/exportUtils";
 
+// Map of signal types to their corresponding icons and colors
 const iconMap = {
-  1: { icon: faPhoneAlt, color: "#007bff" },
-  2: { icon: faExclamationCircle, color: "#dc3545" },
-  3: { icon: faPhoneSlash, color: "#dc3545" },
-  4: { icon: faWaveSquare, color: "#17a2b8" },
-  5: { icon: faPhoneSlash, color: "#ffc107" },
-  6: { icon: faRoad, color: "#28a745" },
-  7: { icon: faComments, color: "#6610f2" },
+  1: { icon: faPhoneAlt, color: "#007bff" }, // Phone icon, blue color
+  2: { icon: faExclamationCircle, color: "#dc3545" }, // Exclamation icon, red color
+  3: { icon: faPhoneSlash, color: "#dc3545" }, // Phone slash icon, red color
+  4: { icon: faWaveSquare, color: "#17a2b8" }, // Wave square icon, teal color
+  5: { icon: faPhoneSlash, color: "#ffc107" }, // Phone slash icon, yellow color
+  6: { icon: faRoad, color: "#28a745" }, // Road icon, green color
+  7: { icon: faComments, color: "#6610f2" }, // Comments icon, purple color
 };
 
-const sampleCallData = [
-  {
-    signalTypeId: 1,
-    signalType: "Emergency Call",
-    totalCalls: Math.floor(Math.random() * 100),
-    completedCalls: Math.floor(Math.random() * 80),
-    pendingCalls: Math.floor(Math.random() * 20),
-  },
-  {
-    signalTypeId: 2,
-    signalType: "Abusive Signal",
-    totalCalls: Math.floor(Math.random() * 100),
-    completedCalls: Math.floor(Math.random() * 80),
-    pendingCalls: Math.floor(Math.random() * 20),
-  },
-  {
-    signalTypeId: 3,
-    signalType: "No Response Call",
-    totalCalls: Math.floor(Math.random() * 100),
-    completedCalls: Math.floor(Math.random() * 80),
-    pendingCalls: Math.floor(Math.random() * 20),
-  },
-  // Add more sample data as needed
-];
-
+// Dashboard component to display call summary
 const Dashboard = () => {
-  const [callData, setCallData] = useState([]);
-  const [totals, setTotals] = useState({ total: 0, completed: 0, pending: 0 });
+  const [callData, setCallData] = useState([]); // State to hold the call data
+  const [totals, setTotals] = useState({ total: 0, completed: 0, pending: 0 }); // State to hold totals for calls
 
   useEffect(() => {
+    // Function to fetch call summary data
     const fetchCallSummary = async () => {
       try {
-        // Fetch data from API
+        // Fetch data from the API endpoint
         const data = await fetchData("/call-summary");
+        
+        // Format the fetched data to include icons and colors based on signal type
         const formattedData = data.map((item) => ({
           ...item,
-          ...iconMap[item.signalTypeId], // Assuming iconMap is defined in the component
+          ...iconMap[item.signalTypeId], // Add icon and color from iconMap
         }));
 
-        // Calculate totals
-        const total = formattedData.reduce((acc, item) => acc + (Number(item.totalCalls) || 0), 0);
-        const completed = formattedData.reduce((acc, item) => acc + (Number(item.completedCalls) || 0), 0);
-        const pending = formattedData.reduce((acc, item) => acc + (Number(item.pendingCalls) || 0), 0);
+        // Calculate total calls from formatted data
+        const total = formattedData.reduce(
+          (acc, item) => acc + (Number(item.totalCalls) || 0), // Sum totalCalls, default to 0 if NaN
+          0
+        );
 
+        // Calculate completed calls
+        const completed = formattedData.reduce(
+          (acc, item) => acc + (Number(item.completedCalls) || 0), // Sum completedCalls, default to 0 if NaN
+          0
+        );
+
+        // Calculate pending calls
+        const pending = formattedData.reduce(
+          (acc, item) => acc + (Number(item.pendingCalls) || 0), // Sum pendingCalls, default to 0 if NaN
+          0
+        );
+
+        // Update state with formatted call data and totals
         setCallData(formattedData);
         setTotals({ total, completed, pending });
       } catch (error) {
-        console.error("Error in fetching call summary:", error);
+        console.error("Error in fetching call summary:", error); // Log error if fetching fails
       }
     };
 
-    // Uncomment this to use the fetchCallSummary
-    // fetchCallSummary();
+    fetchCallSummary(); // Call the function to fetch call summary data
+  }, [fetchData, iconMap]); // Dependencies for useEffect; include fetchData and iconMap
 
-    // For testing, set sample data instead
-    const formattedSampleData = sampleCallData.map((item) => ({
-      ...item,
-      ...iconMap[item.signalTypeId],
-    }));
-
-    // Calculate totals for sample data
-    const total = formattedSampleData.reduce((acc, item) => acc + (Number(item.totalCalls) || 0), 0);
-    const completed = formattedSampleData.reduce((acc, item) => acc + (Number(item.completedCalls) || 0), 0);
-    const pending = formattedSampleData.reduce((acc, item) => acc + (Number(item.pendingCalls) || 0), 0);
-
-    setCallData(formattedSampleData);
-    setTotals({ total, completed, pending });
-  }, []);
 
   return (
     <div className="main_content_iner overly_inner mt-5">
@@ -313,7 +129,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-                <table className="table table-responsive-lg ml-4">
+                <table className="table ml-4">
                   <thead>
                     <tr>
                       <th>Total Calls</th>
@@ -329,7 +145,9 @@ const Dashboard = () => {
                       <td>{call.pendingCalls}</td>
                       <td>
                         <NavLink
-                          to={`/calldata?signal_type=${call.signalTypeId}&type=${encodeURIComponent(call.signalType)}`}
+                          to={`/calldata?signal_type=${
+                            call.signalTypeId
+                          }&type=${encodeURIComponent(call.signalType)}`}
                           data-toggle="tooltip"
                           title="View Call Details"
                         >

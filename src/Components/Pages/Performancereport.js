@@ -15,6 +15,7 @@ import {
   exportToPDF,
   fetchPerformanceData,
 } from "../../utils/exportUtils";
+import paginationFactory from 'react-bootstrap-table2-paginator'; // Import pagination factory
 
 
 export default function PerformanceReport() {
@@ -43,30 +44,82 @@ export default function PerformanceReport() {
 
   // Define columns for "SCO Performance"
   const columnsCO = [
-    { dataField: "srNo", text: "Sr. No" },
-    { dataField: "co_employee_code", text: "Employee Code" },
-    { dataField: "co_name", text: "CO Name" },
-    { dataField: "total_calls", text: "Total Calls" },
-    // { dataField: "total_completed_calls", text: "Total Completed Calls" },
-    {
-      dataField: "average_call_duration_millis",
-      text: "Average Call Duration (MM:SS)",
-    }, // Updated text
-    { dataField: "sop_score", text: "Compliance of SOP QA" },
-    {
-      dataField: "active_listening_score",
-      text: "Active Listening & Proper Response QA",
+    { dataField: "srNo", text: "Sr. No", sort: true },
+    { dataField: "co_employee_code", text: "Employee Code", sort: true },
+    { dataField: "co_name", text: "CO Name", sort: true },  
+    { dataField: "total_calls", text: "Total Calls", sort: true,
+      headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {column.text}
+          {sortElement}
+          &ensp;
+          {<FontAwesomeIcon icon={faSortDown} />}
+        </div>
+      ),
+     },
+    { dataField: "average_call_duration_millis", text: "Average Call", sort: true,
+      headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {column.text}
+          {sortElement}
+          &ensp;
+          {<FontAwesomeIcon icon={faSortDown} />}
+        </div>
+      ),
     },
-    {
-      dataField: "relevent_detail_score",
-      text: "Correct and Relevant Details Capturing QA",
+    { dataField: "sop_score", text: "Compliance of SOP", sort: true },
+    { dataField: "active_listening_score", text: "Active Listening & Proper Response", sort: true,
+      headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {column.text}
+          {sortElement}
+          &ensp;
+          {<FontAwesomeIcon icon={faSortDown} />}
+        </div>
+      ),
+     },
+    { dataField: "relevent_detail_score", text: "Correct and Relevant Details Capturing", sort: true,
+      headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {column.text}
+          {sortElement}
+          &ensp;
+          {<FontAwesomeIcon icon={faSortDown} />}
+        </div>
+      ),
+     },
+    { dataField: "address_tagging_score", text: "Correct Address Tagging", sort: true,
+      headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {column.text}
+          {sortElement}
+          &ensp;
+          {<FontAwesomeIcon icon={faSortDown} />}
+        </div>
+      ),
+     },
+    { dataField: "call_handled_time_score", text: "Call Handled Time", sort: true,
+      headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {column.text}
+          {sortElement}
+          &ensp;
+          {<FontAwesomeIcon icon={faSortDown} />}
+        </div>
+      ),
+     },
+    { dataField: "average_score", text: "Average Score", sort: true,
+  
+      headerFormatter: (column, colIndex, { sortElement, sortOrder }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {column.text}
+          {sortElement}
+          &ensp;
+          {<FontAwesomeIcon icon={faSortDown} />}
+        </div>
+      ),
     },
-    { dataField: "address_tagging_score", text: "Correct Address Tagging QA" },
-    { dataField: "call_handled_time_score", text: "Call Handled Time" },
-    // { dataField: "call_duration_millis", text: "Call Duration (MM:SS)" },
-    { dataField: "average_score", text: "Average Score" },
   ];
-
   // Define columns for "SCO Performance"
   const columnsSCO = [
     { dataField: "srNo", text: "Sr. No", sort: true },
@@ -219,7 +272,6 @@ export default function PerformanceReport() {
     fetchData(1, reportType, fromDate, toDate, selectedShift); // Call fetchData with current parameters
   };
 
-
   useEffect(() => {
     if (searchQuery.trim() === "") {
       // If searchQuery is empty, show full tableData
@@ -237,9 +289,37 @@ export default function PerformanceReport() {
     }
   }, [searchQuery, tableData]);
 
-  const handleItemsPerPageChange = (event) => {
-    setItemsPerPage(parseInt(event.target.value, 10));
+
+  const handleItemsPerPageChange = (e) => {
+    const value = e.target.value;
+
+    if (value === "all") {
+        setItemsPerPage(totalItems); // Assuming totalItems is the total number of records
+    } else {
+        setItemsPerPage(parseInt(value, 10)); // Convert the value to a number
+    }
+
+    setCurrentPage(1); // Reset to the first page whenever items per page changes
   };
+
+  const paginationOptions = {
+    custom: true,
+    totalSize: totalItems,
+    sizePerPage: itemsPerPage,
+    page: currentPage,
+    onPageChange: (page, sizePerPage) => {
+        setCurrentPage(page);
+        setItemsPerPage(sizePerPage);
+    },
+    sizePerPageList: [
+        { text: '5', value: 5 },
+        { text: '10', value: 10 },
+        { text: '25', value: 25 },
+        { text: '50', value: 50 },
+        { text: 'All', value: totalItems }, // This should work to show all items
+    ],
+  };
+
   return (
     <div>
       <div className="main_content_iner overly_inner mt-5">
@@ -264,7 +344,7 @@ export default function PerformanceReport() {
             </div>
           </div>
           <div
-            className="ml-lg-auto p-lg-5 w-25"
+            className="ml-lg-auto p-lg-5 w-25 mr-lg-n5"
             style={{ marginBottom: "-118px" }}
           >
             <Form.Control
@@ -288,7 +368,7 @@ export default function PerformanceReport() {
                 </Form.Control>
               </Form.Group>
             </div>
-            <div className="col-lg-1 col-md-6 col-sm-6">
+            <div className="col-lg-2 col-md-6 col-sm-6">
               <Form.Group controlId="fromDateSelect">
                 <Form.Label>From Date</Form.Label>
                 <Form.Control
@@ -299,7 +379,7 @@ export default function PerformanceReport() {
               </Form.Group>
             </div>
 
-            <div className="col-lg-1 col-md-6 col-sm-6">
+            <div className="col-lg-2 col-md-6 col-sm-6">
               <Form.Group controlId="toDateSelect">
                 <Form.Label>To Date</Form.Label>
                 <Form.Control
@@ -328,18 +408,19 @@ export default function PerformanceReport() {
                 </Form.Control>
               </Form.Group>
             </div>
-            <div className="col-lg-2 col-md-5 col-sm-6">
-      <Form.Group controlId="itemsPerPageSelect">
-        <Form.Label>Items Per Page</Form.Label>
-        <Form.Control as="select" value={itemsPerPage} onChange={handleItemsPerPageChange}>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </Form.Control>
-      </Form.Group>
-    </div>
-            <div className="col-lg-1 col-md-6 col-sm-6">
+            {/* <div
+            className="w-auto"
+            style={{ marginBottom: "-25px" }}
+          >
+            <Form.Control
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div> */}
+        
+            <div className="col-lg-auto col-md-6 col-sm-6">
               <Button
                 variant="primary mt-4"
                 data-toggle="tooltip"
@@ -350,7 +431,18 @@ export default function PerformanceReport() {
                 <FontAwesomeIcon icon={faSearch} />
               </Button>
             </div>
-            <div className="col-lg-3 col-md-6 col-sm-6 mt-4">
+            <div className="col-lg-1 col-md-5 col-sm-6" style={{marginTop : "-60px"}}>
+            <Form.Group controlId="itemsPerPageSelect">
+              {/* <Form.Label>Items Per Page</Form.Label> */}
+              <Form.Control as="select" value={itemsPerPage} onChange={handleItemsPerPageChange}>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value="all">All</option>
+              </Form.Control>
+            </Form.Group>
+          </div>
+            <div className="col-lg-2 col-md-6 col-sm-6 mt-4">
               <button
                 className="btn"
                 style={{
@@ -409,21 +501,23 @@ export default function PerformanceReport() {
           <div className="row">
             <div className="col-lg-12 col-md-12 col-sm-12 card_height_100">
               <div className="white_card mb_20" ref={tableRef}>
-                <div className="table-responsive ml-5">
-                  <div className="mt-4">
+                <div className="ml-5">
+                  <div className="mt-4 table-responsive">
                     {noDataMessage ? (
                       <div className="alert alert-info mt-4 mr-5">
                         {noDataMessage}
                       </div>
                     ) : (
-                      <BootstrapTable
-                        keyField="srNo"
-                        data={tableData}
-                        columns={columns}
-                        noDataIndication={() =>
-                          loading ? "Loading..." : "No records found"
-                        }
-                      />
+
+                    <BootstrapTable
+                      keyField="id"
+                      data={filteredData}
+                      columns={columns}
+                      pagination={paginationFactory(paginationOptions)}
+                      striped
+                      hover
+                      condensed
+                    />
                     )}
                   </div>
                 </div>
