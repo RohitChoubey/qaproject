@@ -14,7 +14,8 @@ To edit your crontab file, open a terminal and run:
 
 ```bash
 crontab -e
-
+```
+```bash
 
 Step 2: Understand the Crontab Format
     Each line in the crontab file follows this format:
