@@ -56,8 +56,7 @@ crontab -e
 
 
 # 2. QA Module API
-        
-## This repository contains the API for the QA module. Follow the steps below to run the API using Node.js.
+This repository contains the API for the QA module. Follow the steps below to run the API using Node.js.
 
 ## Prerequisites
     Make sure you have Node.js installed on your machine.
