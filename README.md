@@ -34,24 +34,30 @@ crontab -e
 
 ### Step 3: Add Your Cron Job
     For example, to run a script located at /path/to/your/script.sh every day at 2 AM, add the following line:
+   
     ```bash
     0 2 * * * /path/to/your/script.sh
 
-```
+    ```
 
 
-Step 4: Save and Exit
+### Step 4: Save and Exit
     To save and exit the crontab editor:
 
+```bash
     If you are using nano, press CTRL + X, then Y to confirm saving, and Enter to exit.
     If you are using vim, press Esc, type :wq, and then press Enter to save and exit.
 
+```
 
-Step 5: View Your Cron Jobs
+### Step 5: View Your Cron Jobs
     To list your scheduled cron jobs, run:
+    
+    ```bash 
 
         crontab -l
-
+        
+    ```
 
 Additional Notes
     Logging Output: By default, cron jobs may log output to the user's mail. To capture output or errors, redirect them to a log file:
