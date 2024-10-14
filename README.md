@@ -45,6 +45,7 @@ crontab -e
     To save and exit the crontab editor:
 
 ```bash
+
     If you are using nano, press CTRL + X, then Y to confirm saving, and Enter to exit.
     If you are using vim, press Esc, type :wq, and then press Enter to save and exit.
 
@@ -52,46 +53,52 @@ crontab -e
 
 ### Step 5: View Your Cron Jobs
     To list your scheduled cron jobs, run:
-    
-    ```bash 
 
-        crontab -l
-        
+     ```bash 
+            crontab -l
     ```
 
-Additional Notes
+
+### Additional Notes
     Logging Output: By default, cron jobs may log output to the user's mail. To capture output or errors, redirect them to a log file:
-
+```bash 
         0 2 * * * /path/to/your/script.sh >> /path/to/logfile.log 2>&1
-
+```
     Environment Considerations: Cron jobs run in a minimal environment. If your script relies on specific environment variables, make sure to set them within the script or in the crontab.
 
 
 
-        ### QA Module API
+# QA Module API
         
     This repository contains the API for the QA module. Follow the steps below to run the API using Node.js.
 
-    ## Prerequisites
+## Prerequisites
     Make sure you have Node.js installed on your machine.
 
     Steps to Run the API
-    Step 1: Clone the Repository:
+### Step 1: Clone the Repository:
 
-
+    ```bash 
         git clone https://github.com/YourUsername/qaAPI.git
         cd qaAPI
-
-
-    Step 2: Install Dependencies:
+    ```
+### Step 2: Install Dependencies:
+        
         Run the following command to install the required packages:
+       
+        ```bash 
+        
         npm install
+       
+        ```
 
-    Step 3: Run the API:
+### Step 3: Run the API:
         Start the API with the following command:
-        npm start
+       
+       ```bash
+            npm start
+        ```
 
-    Step 4: Access the API:
+### Step 4: Access the API:
         Once the API is running, you can access it at http://localhost:3000 (or the specified port).
-    Conclusion
-        With these steps, you can successfully create and manage cron jobs on your Linux system and run the QA module API using Node.js. This allows for efficient task scheduling, automation, and API management.
+  
