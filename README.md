@@ -15,12 +15,13 @@ To edit your crontab file, open a terminal and run:
 ```bash
 crontab -e
 ```
+
+### Step 2: Understand the Crontab Format
+    Each line in the crontab file follows this format:
 ```bash
 
-Step 2: Understand the Crontab Format
-    Each line in the crontab file follows this format:
-
         * * * * * command_to_execute
+```
 
     The five asterisks represent the following time fields:
 
@@ -29,14 +30,14 @@ Step 2: Understand the Crontab Format
     Day of Month (1-31)
     Month (1-12)
     Day of Week (0-7) (Sunday is both 0 and 7)
-```
 
 
-Step 3: Add Your Cron Job
+### Step 3: Add Your Cron Job
     For example, to run a script located at /path/to/your/script.sh every day at 2 AM, add the following line:
-
+    ```bash
     0 2 * * * /path/to/your/script.sh
 
+```
 
 
 Step 4: Save and Exit
