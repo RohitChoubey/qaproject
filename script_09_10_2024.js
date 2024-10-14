@@ -17,17 +17,13 @@ const currentDate = new Date();
 
 // Calculate the previous day
 const previousDay = new Date(currentDate);
-previousDay.setDate(currentDate.getDate() - 1);  // Set to the previous day
+previousDay.setDate(currentDate.getDate() - 1); // Set to the previous day
 
-// Calculate the start time (00:00:00) of the previous day in milliseconds
-const startTime = new Date(previousDay.setHours(0, 0, 0, 0)).getTime();  // Start of the previous day in milliseconds
-// const startTime = new Date(previousDay.setHours(0, 15, 0, 0)).getTime(); // Start of the previous day at 00:15 AM
+// Calculate the start time (00:15:00) of the previous day
+const startTime = new Date(previousDay.setHours(0, 15, 0, 0)).getTime(); // Start of the previous day at 00:15 AM
 
-
-// Calculate the end time (23:59:59) of the previous day in milliseconds
+// Calculate the end time (00:14:59.999) of the previous day
 const endTime = new Date(previousDay.setHours(23, 59, 59, 999)).getTime();
-  // const endTime = new Date(previousDay.setHours(0, 14, 59, 999)).getTime(); // End at 00:14:59.999
-
 
 async function fetchDataAndInsert() {
   let connection;
@@ -36,49 +32,44 @@ async function fetchDataAndInsert() {
       params: {
         startTime: startTime,
         endTime: endTime,
-        //  startTime : 1725132600000,
-        //  endTime: 1725219000000,
         isSummary: false,
         asDownloadable: true,
         pageNumber: 0,
         pageSize: 10000
       }
     });
-    const params1 = {
-      startTime: startTime,
-      endTime: endTime,
-      isSummary: false,
-      asDownloadable: true,
-      pageNumber: 0,
-      pageSize: 10000
-    };
+
     
-    // Log only the params object
-    console.log('Request Parameters:', params1);
     // Extract data from the response
-    const data = response.data.returnList;
+    const data = response.data.returnList || []; // Default to an empty array if undefined
+    console.log(data);
+    
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn('No data found in the response.');
+      return; // Exit early if there's no data to process
+    }
+
     // Create a MySQL connection
     connection = await mysql.createConnection(dbConfig);
-  
+
     // Fetch all signal statuses and their IDs from master_signal_status
     const [statuses] = await connection.execute('SELECT signal_status, signal_status_id FROM master_signal_status WHERE is_active = "Y"');
 
     // Create a lookup map for signal_status to signal_status_id
     const statusMap = {};
     statuses.forEach(status => {
-      // Use the signal_status value as is, including underscores
       statusMap[status.signal_status] = status.signal_status_id;
     });
 
     const logQuery1 = `
-    INSERT INTO cron_job_logs (log_details, created_at, updated_at)
-    VALUES (?, NOW(), NOW())
-  `;
-  const logData = {
-    success: true,
-    apiResponse: response.data   // Log the API response data
-  };
-  await connection.execute(logQuery1, [JSON.stringify(logData)]);
+      INSERT INTO cron_job_logs (log_details, created_at, updated_at)
+      VALUES (?, NOW(), NOW())
+    `;
+    const logData = {
+      success: true,
+      apiResponse: response.data // Log the API response data
+    };
+    await connection.execute(logQuery1, [JSON.stringify(logData)]);
 
     // Prepare the SQL query for batch insertion
     const insertQuery = `
@@ -112,46 +103,47 @@ async function fetchDataAndInsert() {
         updated_at
       ) VALUES ?
     `;
-  
+
     // Map the data to an array of values
     const values = data.map(item => {
       const eventInfo = item.eventBasicInfo || {};
       const victimInfo = eventInfo.victimInfo || {};
       const signalStatusId = statusMap[item.signalStatus] || null; // Correct field name for signalStatus
-  return [
-    item.signalId || null,
-    item.eventId || null,
-    null, // Map directly to signalType from API
-    item.signalLandingTime || null,
-    eventInfo.eventMainType || null,
-    eventInfo.eventSubType || null, 
-    item.voipExtn || null,
-    item.agentName || null,
-    item.addlSignalInfo || null,
-    item.voicePath || null,
-    item.callPickDurationMillis || null,  // Ensure null if missing
-    item.callDurationMillis || null,      // Ensure null if missing
-    item.eventRegistrationTime || null,  // Ensure null if missing
-    item.agentFullName || null,
-    eventInfo.priority || null,
-    eventInfo.districtCode || null,
-    victimInfo.personName || null,
-    victimInfo.age || null,                // Ensure null if missing
-    victimInfo.gender || null,             // Ensure null if missing
-    victimInfo.personAddress || null,
-    eventInfo.nearPs || null,
-    eventInfo.addlInfo || null,
-    signalStatusId,
-    'Pending', // review_status default to Pending
-    'Y', // is_active default to Y
-    new Date(), // created_at
-    new Date()  // updated_at
-  ];
-});
-    //Execute the batch insert query
+      return [
+        item.signalId || null,
+        item.eventId || null,
+        null, // Map directly to signalType from API
+        item.signalLandingTime || null,
+        eventInfo.eventMainType || null,
+        eventInfo.eventSubType || null, 
+        item.voipExtn || null,
+        item.agentName || null,
+        item.addlSignalInfo || null,
+        item.voicePath || null,
+        item.callPickDurationMillis || null,  // Ensure null if missing
+        item.callDurationMillis || null,      // Ensure null if missing
+        item.eventRegistrationTime || null,  // Ensure null if missing
+        item.agentFullName || null,
+        eventInfo.priority || null,
+        eventInfo.districtCode || null,
+        victimInfo.personName || null,
+        victimInfo.age || null,                // Ensure null if missing
+        victimInfo.gender || null,             // Ensure null if missing
+        victimInfo.personAddress || null,
+        eventInfo.nearPs || null,
+        eventInfo.addlInfo || null,
+        signalStatusId,
+        'Pending', // review_status default to Pending
+        'Y', // is_active default to Y
+        new Date(), // created_at
+        new Date()  // updated_at
+      ];
+    });
+
+    // Execute the batch insert query
     await connection.query(insertQuery, [values]);
 
-   // Update signal_type based on signal_status
+    // Update signal_type based on signal_status
     const updateSignalTypeQuery = `
       UPDATE call_data cd
       JOIN master_signal_status mss ON cd.signal_status = mss.signal_status_id
@@ -161,8 +153,8 @@ async function fetchDataAndInsert() {
     `;
     await connection.execute(updateSignalTypeQuery);
 
-     // Get data from master_signal_type
-     const [signalTypes] = await connection.execute('SELECT * FROM master_signal_type WHERE is_active = "Y"');
+    // Get data from master_signal_type
+    const [signalTypes] = await connection.execute('SELECT * FROM master_signal_type WHERE is_active = "Y"');
 
     for (const type of signalTypes) {
       const percentage = type.percentage_of_calls_qa;
@@ -170,13 +162,6 @@ async function fetchDataAndInsert() {
       const signalTypeId = type.signal_type_id;
 
       // Fetch call data for the current signal_type
-      // const [callData] = await connection.execute(`
-      //   SELECT id, agent_name
-      //   FROM call_data
-      //   WHERE signal_type = ?
-      //     AND FROM_UNIXTIME(signal_landing_time / 1000) BETWEEN DATE_SUB(NOW(), INTERVAL 1 DAY) AND NOW()
-      //     AND is_qa_active = 'N'
-      // `, [signalTypeId]);
       const [callData] = await connection.execute(`
         SELECT id, agent_name
         FROM call_data
@@ -221,6 +206,7 @@ async function fetchDataAndInsert() {
         `);
       }
     }
+
     console.log('Data inserted and updated successfully!');
 
     // Insert log data into the cron_job_logs table

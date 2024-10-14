@@ -43,7 +43,8 @@ exports.getCoQaDataByDateRange = (req, res) => {
         d.agent_name,
         d.agent_full_name,
         d.call_duration_millis,
-        d.signal_landing_time
+        d.signal_landing_time,
+        d.signal_type
       FROM co_qa_data c
       JOIN call_data d
         ON c.signal_id = d.signal_id
@@ -82,16 +83,26 @@ GROUP BY sco_employee_code, sco_name;
     if (reportType === 'CO') {
       // Process the results to merge data by agent_name
       const aggregatedData = results.reduce((acc, curr) => {
-        const { agent_name } = curr;
-
-        // Calculate the average score for the current row
-        const rowAverageScore = (
-          curr.sop_score +
-          curr.active_listening_score +
-          curr.relevent_detail_score +
-          curr.address_tagging_score +
-          curr.call_handled_time_score
-        ) / 5;
+         const { agent_name, signal_type } = curr;
+    // Calculate the average score based on signal_type
+    let rowAverageScore;
+    if (signal_type === 1) {
+      // For signal_type 1, average all 5 scores
+      rowAverageScore = (
+        curr.sop_score +
+        curr.active_listening_score +
+        curr.relevent_detail_score +
+        curr.address_tagging_score +
+        curr.call_handled_time_score
+      ) / 5;
+    } else {
+      // For other signal_types, average only 3 scores
+      rowAverageScore = (
+        curr.sop_score +
+        curr.active_listening_score +
+        curr.call_handled_time_score
+      ) / 3;
+    }
 
         if (!acc[agent_name]) {
           acc[agent_name] = {
